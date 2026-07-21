@@ -39,7 +39,7 @@ const W = cv.width, H = cv.height, TILE = 36;
 let AC = null, musicOn = true, musicTimer = null, musicStep = 0;
 function audio(){ if(!AC){ AC = new (window.AudioContext||window.webkitAudioContext)(); startMusic(); } if(AC.state==='suspended') AC.resume(); }
 function beep(freq, dur, type='square', vol=0.08, slide=0){
-  if(!AC) return;
+  if(!AC || !sfxOn) return;
   const o = AC.createOscillator(), g = AC.createGain();
   o.type = type; o.frequency.setValueAtTime(freq, AC.currentTime);
   if(slide) o.frequency.exponentialRampToValueAtTime(Math.max(30,freq+slide), AC.currentTime+dur);
@@ -84,6 +84,11 @@ window.addEventListener('keydown', e=>{
   if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key)) e.preventDefault();
   keys[e.key.toLowerCase()] = true;
   if(e.key===' ') keys['space'] = true;
+  if(e.key==='p'||e.key==='P'||e.key==='Escape'){
+    if(state==='PLAY'){ state='PAUSE'; }
+    else if(state==='PAUSE'){ state='PLAY'; }
+  }
+  if((e.key==='m'||e.key==='M') && state==='PAUSE'){ state='WORLDMAP'; }
   handleUIKey(e.key);
 });
 window.addEventListener('keyup', e=>{
@@ -129,7 +134,7 @@ const CHARS = [
    P start  F traguardo
 ==================================================================== */
 const LEVELS = [
-{ name:'1. PRATI SALTERINI', time:300, sky:['#66ccff','#cceeff'], hills:'#3fa34d', world:1,
+{ name:'1. PRATI SALTERINI', time:300, sky:['#66ccff','#cceeff'], hills:'#3fa34d', world:1, icon:'flower',
 rows:[
 '                                                                                                                                                            ',
 '                                                                                                                                                            ',
@@ -145,8 +150,9 @@ rows:[
 '################   ######### ##      ##   ##  ## ############ ### ############### ######   ######## ######## ####  #### ######  ##################X#####   ',
 '################   ######### ##      ##   ##  ## ############ ### ############### ######   ######## ######## ####  #### ######  ##################X#####   ',
 '################   ######### ##      ##   ##  ## ############ ### ############### ######   ######## ######## ####  #### ######  ##################X#####   ',
+
 ]},
-{ name:'2. GROTTE ROVENTI', time:280, sky:['#2b1230','#5a1e3a'], hills:'#3a1226', world:1,
+{ name:'2. GROTTE ROVENTI', time:280, sky:['#2b1230','#5a1e3a'], hills:'#3a1226', world:1, icon:'flame',
 rows:[
 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
 '                                                                                                                                            ',
@@ -161,7 +167,7 @@ rows:[
 'XXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLXXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXXXXX',
 'XXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLXXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXXXXX',
 ]},
-{ name:'BOSS: RE MELMONE', time:200, sky:['#30071a','#6b0f2a'], hills:'#22030f', boss:true, world:1, bossKind:'melmone',
+{ name:'BOSS: RE MELMONE', time:200, sky:['#30071a','#6b0f2a'], hills:'#22030f', boss:true, world:1, bossKind:'melmone', icon:'crown',
 rows:[
 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX ',
 'X                                     X',
@@ -174,7 +180,7 @@ rows:[
 'X                                     X',
 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX ',
 ]},
-{ name:'3. PALUDE NEBBIOSA', time:300, sky:['#3a4a3a','#6a7a5a'], hills:'#2a3a24', hazard:['#4a7a2a','#8fce4a'], world:2,
+{ name:'3. PALUDE NEBBIOSA', time:300, sky:['#3a4a3a','#6a7a5a'], hills:'#2a3a24', hazard:['#4a7a2a','#8fce4a'], world:2, icon:'frog',
 rows:[
 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
 '                                                                                                                                            ',
@@ -189,7 +195,7 @@ rows:[
 'XXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLXXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXXXXX',
 'XXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLXXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXXXXX',
 ]},
-{ name:'4. ROVINE SOMMERSE', time:280, sky:['#2a3a44','#4a5a64'], hills:'#1e2a30', hazard:['#3a8a6a','#7adfc0'], world:2,
+{ name:'4. ROVINE SOMMERSE', time:280, sky:['#2a3a44','#4a5a64'], hills:'#1e2a30', hazard:['#3a8a6a','#7adfc0'], world:2, icon:'pillar',
 rows:[
 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
 '                                                                                                                                            ',
@@ -204,7 +210,7 @@ rows:[
 'XXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLXXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXXXXX',
 'XXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLXXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXXXXX',
 ]},
-{ name:'BOSS: BARONE RANOCCHIO', time:220, sky:['#0a2a1a','#1f5a2a'], hills:'#082010', boss:true, bossKind:'ranocchio', world:2,
+{ name:'BOSS: BARONE RANOCCHIO', time:220, sky:['#0a2a1a','#1f5a2a'], hills:'#082010', boss:true, bossKind:'ranocchio', world:2, icon:'frogcrown',
 rows:[
 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
 'X                                        X',
@@ -217,7 +223,7 @@ rows:[
 'X                                        X',
 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
 ]},
-{ name:'5. CIELO TEMPESTOSO', time:280, sky:['#1a2a6c','#4a3f9f'], hills:'#26205e', world:3,
+{ name:'5. CIELO TEMPESTOSO', time:280, sky:['#1a2a6c','#4a3f9f'], hills:'#26205e', world:3, icon:'cloud',
 rows:[
 '                                                                                                                                            ',
 '                               c c c                                                   c c c                                                ',
@@ -232,7 +238,7 @@ rows:[
 '                                                                                                                                            ',
 '                                                                                                                                            ',
 ]},
-{ name:'6. TORRE DEI FULMINI', time:280, sky:['#241a3f','#5a3f9f'], hills:'#1a1430', world:3,
+{ name:'6. TORRE DEI FULMINI', time:280, sky:['#241a3f','#5a3f9f'], hills:'#1a1430', world:3, icon:'tower',
 rows:[
 '                                                                                                                                            ',
 '                               c c c                                                   c c c                                                ',
@@ -247,7 +253,7 @@ rows:[
 '                                                                                                                                            ',
 '                                                                                                                                            ',
 ]},
-{ name:'BOSS FINALE: IMPERATORE FULMINE', time:260, sky:['#150a30','#3a1a6a'], hills:'#0d0620', boss:true, bossKind:'fulmine', world:3,
+{ name:'BOSS FINALE: IMPERATORE FULMINE', time:260, sky:['#150a30','#3a1a6a'], hills:'#0d0620', boss:true, bossKind:'fulmine', world:3, finalBoss:true, icon:'bolt',
 rows:[
 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
 'X                                                      X',
@@ -261,14 +267,43 @@ rows:[
 'X                                                      X',
 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
 ]},
+
 ]
 
 /* ============================= STATO GIOCO ============================= */
-let state = 'MENU';        // MENU, PLAY, CLEAR, GAMEOVER, WIN, WORLDCARD
+let state = 'TITLE';        // TITLE, SETTINGS, MENU, WORLDMAP, PLAY, CLEAR, GAMEOVER, CREDITS, WORLDCARD, BOSSCARD, WORLDEND, PAUSE
+let titleSel = 0;   // 0 GIOCA, 1 IMPOSTAZIONI, 2 ESCI
+let mapSel = 0;      // indice livello selezionato sulla mappa del mondo
+let mapAvatarX = 0, mapAvatarY = 0; // posizione animata dell'omino sulla mappa
+let sfxOn = true;
+let clearedLevels = new Set();
+let showQuitMsg = false;
 let worldCardT = 0;
 let bossCardT = 0;
 let bossDeadT = 0;
 let worldEndT = 0;
+let levelCoinsGot = 0;
+let perfectCoins = false;
+
+/* ============================= CLASSIFICA (salvata nel browser) ============================= */
+function loadScores(){
+  try{ return JSON.parse(localStorage.getItem('superbaldo_scores')||'[]'); }catch(e){ return []; }
+}
+let scoreSaved = false;
+function saveScoreIfHigh(finalScore){
+  if(scoreSaved) return; scoreSaved = true;
+  try{
+    let list = loadScores();
+    if(list.length<5 || finalScore>list[list.length-1].score){
+      let name = 'BALDO';
+      try{ const p = window.prompt('Nuovo record! Il tuo nome (max 8 lettere):','BALDO'); if(p) name=p.slice(0,8).toUpperCase(); }catch(e){}
+      list.push({name, score:finalScore});
+      list.sort((a,b)=>b.score-a.score);
+      list = list.slice(0,5);
+      localStorage.setItem('superbaldo_scores', JSON.stringify(list));
+    }
+  }catch(e){}
+}
 let charIdx = 0, levelIdx = 0, worldSel = 1;
 let score = 0, coins = 0, lives = 3, timeLeft = 0;
 let world = null, player = null, cam = {x:0,y:0};
@@ -280,15 +315,16 @@ function buildWorld(idx){
   const L = LEVELS[idx];
   const rows = L.rows.map(r=>r.split(''));
   const w = Math.max(...rows.map(r=>r.length));
-  const ents = []; let start = {x:2,y:2}; let flag = null; let boss = null;
+  const ents = []; let start = {x:2,y:2}; let flag = null; let boss = null; let totalCoins = 0;
   for(let y=0;y<rows.length;y++) for(let x=0;x<w;x++){
     const ch = rows[y][x]||' ';
     if(ch==='P'){ start={x,y}; rows[y][x]=' '; }
     if(ch==='F'){ flag={x,y}; rows[y][x]=' '; }
+    if(ch==='c'){ totalCoins++; }
     if('esfjr'.includes(ch)){ ents.push(makeEnemy(ch,x,y)); rows[y][x]=' '; }
     if(ch==='G'){ boss = makeBoss(x,y,L.bossKind); ents.push(boss); rows[y][x]=' '; }
   }
-  return { rows, w, h:rows.length, ents, start, flag, boss,
+  return { rows, w, h:rows.length, ents, start, flag, boss, totalCoins,
            fireballs:[], items:[], warnings:[], cfg:L };
 }
 const tileAt = (w,x,y)=> (x<0) ? 'X' : ((y<0||y>=w.h||x>=w.w) ? ' ' : (w.rows[y][x]||' '));
@@ -318,7 +354,7 @@ function makePlayer(){
   const c = CHARS[charIdx];
   return { x:0, y:0, w:26, h:32, vx:0, vy:0, onGround:false, face:1,
     big:false, flame:false, ice:false, feather:false, shield:false, star:0,
-    extraHits:c.hits, jumps:0, coyote:0, jbuf:0, inv:0, fireCd:0, pounding:false,
+    extraHits:c.hits, jumps:0, coyote:0, jbuf:0, inv:0, fireCd:0, pounding:false, combo:0,
     dead:false, deadT:0, animT:0, c };
 }
 function spawnPlayer(){
@@ -329,6 +365,13 @@ function spawnPlayer(){
   player.h = player.big ? 44 : 32;
   cam.x = Math.max(0, player.x - W/3); cam.y = 0;
 }
+function nodePos(i){
+  const row = Math.floor(i/3);
+  let col = i%3;
+  if(row%2===1) col = 2-col;
+  return { x: 170 + col*300, y: 155 + row*150 };
+}
+const MAP_NODES = LEVELS.map((l,i)=>nodePos(i));
 const WORLD_INFO = {
   1:{ title:'MONDO 1 · IL REGNO DELLE BACCHE', sub:'Le Bacche Magiche sono sparite nel nulla: solo un eroe può ritrovarle!', col:'#ffd60a' },
   2:{ title:'MONDO 2 · LA PALUDE NEBBIOSA', sub:'Le orme portano nella palude: il Barone Ranocchio sa dove sono le bacche...', col:'#8fce4a' },
@@ -342,7 +385,7 @@ const BOSS_TAUNTS = {
 function startLevel(i){
   const prevWorld = LEVELS[levelIdx] ? LEVELS[levelIdx].world : null;
   levelIdx = i; world = buildWorld(i); timeLeft = LEVELS[i].time*60;
-  particles=[]; floats=[]; spawnPlayer();
+  particles=[]; floats=[]; levelCoinsGot=0; spawnPlayer();
   if(LEVELS[i].world && LEVELS[i].world!==prevWorld){ state='WORLDCARD'; worldCardT=150; }
   else if(LEVELS[i].boss){ state='BOSSCARD'; bossCardT=140; }
   else state='PLAY';
@@ -355,6 +398,12 @@ function puff(x,y,col,n=8,spd=3){
 }
 function floatText(x,y,txt,col='#fff'){ floats.push({x,y,txt,col,life:50}); }
 function addScore(n,x,y){ score+=n; if(x!==undefined) floatText(x,y,'+'+n,'#ffe066'); }
+function stompScore(target,baseScore){
+  player.combo = (player.combo||0) + 1;
+  const mult = Math.min(player.combo, 8);
+  addScore(baseScore*mult, target.x, target.y);
+  if(mult>1){ floatText(target.x, target.y-20, 'COMBO x'+mult+'!', '#ff9de0'); SFX.power(); }
+}
 
 /* ============================= FISICA ============================= */
 const GRAV = 0.55, MAXFALL = 13;
@@ -449,7 +498,7 @@ function updatePlayer(){
     p.deadT++; p.vy += GRAV; p.y += p.vy;
     if(p.deadT>110){
       lives--;
-      if(lives<0){ state='GAMEOVER'; }
+      if(lives<0){ state='GAMEOVER'; saveScoreIfHigh(score); }
       else { p.big=false; p.flame=false; p.feather=false; p.shield=false;
              p.extraHits=c.hits; spawnPlayer(); player.inv=90; }
     }
@@ -483,6 +532,7 @@ function updatePlayer(){
   p.bumped = null;
   moveEntity(p, true);
   if(p.onGround) p.jumps = 0;
+  if(p.onGround) p.combo = 0;
   if(p.pounding && p.onGround){
     p.pounding=false; shake=14; SFX.stomp();
     puff(p.x+p.w/2,p.y+p.h,'#e8d9c0',18,5);
@@ -496,7 +546,7 @@ function updatePlayer(){
   if(p.bumped) hitBlock(p.bumped.tx, p.bumped.ty, p.bumped.ch);
   // tile speciali
   rectVsTiles(p,(tx,ty,ch)=>{
-    if(ch==='c'){ world.rows[ty][tx]=' '; coins++; addScore(100); SFX.coin();
+    if(ch==='c'){ world.rows[ty][tx]=' '; coins++; levelCoinsGot++; addScore(100); SFX.coin();
       puff(tx*TILE+18,ty*TILE+18,'#ffd94a',6);
       if(coins>=50){ coins-=50; lives++; SFX.power(); floatText(p.x,p.y-20,'1UP!','#7dff8a'); } }
     if(ch==='^' ){ hurtPlayer(); if(!p.dead) p.vy=-8; }
@@ -516,6 +566,9 @@ function updatePlayer(){
 function levelClear(){
   SFX.flag(); state='CLEAR'; clearTimer=0;
   addScore(1000 + Math.floor(timeLeft/60)*10, player.x, player.y-20);
+  perfectCoins = world.totalCoins>0 && levelCoinsGot>=world.totalCoins;
+  if(perfectCoins){ addScore(1000, player.x, player.y-50); SFX.power(); }
+  clearedLevels.add(levelIdx);
 }
 
 function updateEnemies(){
@@ -559,7 +612,7 @@ function updateEnemies(){
       if(player.star>0){
         e.dead=1; SFX.stomp(); addScore(300,e.x,e.y); puff(e.x+15,e.y+15,'#ffd60a',12);
       } else if(stompable && falling){
-        e.dead=1; player.vy=-9; SFX.stomp(); addScore(200,e.x,e.y); puff(e.x+15,e.y+15,'#fff',8);
+        e.dead=1; player.vy=-9; SFX.stomp(); stompScore(e,200); puff(e.x+15,e.y+15,'#fff',8);
       } else hurtPlayer();
     }
   }
@@ -695,6 +748,10 @@ function updateCam(){
 
 /* ============================= RENDER ============================= */
 function rr(x,y,w,h,r){ ctx.beginPath(); ctx.roundRect(x,y,w,h,r); ctx.fill(); }
+function hexA(hex,a){
+  const n = parseInt(hex.slice(1),16);
+  return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')';
+}
 function drawSky(cfg){
   const g = ctx.createLinearGradient(0,0,0,H);
   g.addColorStop(0,cfg.sky[0]); g.addColorStop(1,cfg.sky[1]);
@@ -1039,6 +1096,236 @@ function drawHUD(){
 }
 
 /* ============================= SCHERMATE ============================= */
+function drawTitle(){
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#1a0f2e'); g.addColorStop(1,'#3d1f5c');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  for(let i=0;i<40;i++){ ctx.fillStyle='rgba(255,255,255,'+(0.2+((i*37)%60)/100)+')';
+    ctx.fillRect((i*211+frame*0.2)%W, (i*97)%H, 2, 2); }
+  ctx.textAlign='center';
+  ctx.font='bold 64px Courier New'; ctx.fillStyle='#ffd60a';
+  ctx.fillText('SUPER BALDO', W/2, 150+Math.sin(frame*0.05)*6);
+  ctx.font='bold 20px Courier New'; ctx.fillStyle='#ff9de0';
+  ctx.fillText('~ Il Regno delle Bacche ~', W/2, 190);
+  const opts = ['GIOCA', 'IMPOSTAZIONI', 'ESCI'];
+  opts.forEach((o,i)=>{
+    const y = 300 + i*70;
+    const sel = i===titleSel;
+    ctx.fillStyle = sel ? 'rgba(255,214,10,.22)' : 'rgba(255,255,255,.06)';
+    rr(W/2-140, y-28, 280, 56, 12);
+    if(sel){ ctx.strokeStyle='#ffd60a'; ctx.lineWidth=3; ctx.strokeRect(W/2-140,y-28,280,56); }
+    ctx.fillStyle = sel?'#ffd60a':'#cbd5e1'; ctx.font='bold 24px Courier New';
+    ctx.fillText((sel?'▶ ':'')+o+(sel?' ◀':''), W/2, y+9);
+  });
+  ctx.font='13px Courier New'; ctx.fillStyle='#8899aa';
+  ctx.fillText('↑ ↓ per scegliere · SPAZIO per confermare', W/2, 520);
+  if(showQuitMsg){
+    ctx.fillStyle='rgba(0,0,0,.8)'; ctx.fillRect(0,0,W,H);
+    ctx.font='bold 22px Courier New'; ctx.fillStyle='#7dff8a';
+    ctx.fillText('Grazie per aver giocato! Puoi chiudere questa scheda quando vuoi 👋', W/2, H/2-10);
+    ctx.font='14px Courier New'; ctx.fillStyle='#cbd5e1';
+    ctx.fillText('(oppure premi SPAZIO per tornare al titolo)', W/2, H/2+30);
+  }
+}
+function drawSettings(){
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#1a0f2e'); g.addColorStop(1,'#3d1f5c');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  ctx.textAlign='center';
+  ctx.font='bold 34px Courier New'; ctx.fillStyle='#ffd60a';
+  ctx.fillText('IMPOSTAZIONI', W/2, 110);
+  const rows = [
+    ['MUSICA', musicOn],
+    ['EFFETTI SONORI', sfxOn],
+  ];
+  rows.forEach((r,i)=>{
+    const y = 220 + i*80;
+    ctx.fillStyle='rgba(255,255,255,.08)'; rr(W/2-220, y-30, 440, 60, 12);
+    ctx.textAlign='left'; ctx.font='bold 20px Courier New'; ctx.fillStyle='#fff';
+    ctx.fillText(r[0], W/2-190, y+8);
+    ctx.textAlign='right';
+    ctx.fillStyle = r[1] ? '#7dff8a' : '#ff4d6d';
+    ctx.fillText(r[1] ? 'ON  ✔' : 'OFF  ✖', W/2+190, y+8);
+  });
+  ctx.textAlign='center';
+  ctx.font='13px Courier New'; ctx.fillStyle='#9ae6ff';
+  ctx.fillText('1: musica  ·  2: effetti  ·  SPAZIO/ESC: indietro', W/2, 420);
+  ctx.font='bold 16px Courier New'; ctx.fillStyle='#7dff8a';
+  ctx.fillText('PREMI SPAZIO PER TORNARE', W/2, 470+Math.sin(frame*0.1)*3);
+}
+function drawNodeIcon(kind, x, y, s, col){
+  ctx.save(); ctx.translate(x,y);
+  ctx.fillStyle=col; ctx.strokeStyle=col; ctx.lineWidth=Math.max(2,s*0.14);
+  if(kind==='flower'){
+    for(let i=0;i<5;i++){ const a=i*Math.PI*2/5;
+      ctx.beginPath(); ctx.arc(Math.cos(a)*s*0.4, Math.sin(a)*s*0.4, s*0.32, 0, Math.PI*2); ctx.fill(); }
+    ctx.fillStyle='#fff3b0'; ctx.beginPath(); ctx.arc(0,0,s*0.28,0,Math.PI*2); ctx.fill();
+  } else if(kind==='flame'){
+    ctx.beginPath();
+    ctx.moveTo(0,-s*0.9); ctx.quadraticCurveTo(s*0.7,-s*0.1, s*0.25,s*0.5);
+    ctx.quadraticCurveTo(s*0.35,s*0.1, 0,s*0.9);
+    ctx.quadraticCurveTo(-s*0.35,s*0.1, -s*0.25,s*0.5);
+    ctx.quadraticCurveTo(-s*0.7,-s*0.1, 0,-s*0.9); ctx.fill();
+  } else if(kind==='crown'){
+    ctx.beginPath();
+    ctx.moveTo(-s*0.8,s*0.4); ctx.lineTo(-s*0.8,-s*0.1); ctx.lineTo(-s*0.4,s*0.15);
+    ctx.lineTo(0,-s*0.55); ctx.lineTo(s*0.4,s*0.15); ctx.lineTo(s*0.8,-s*0.1);
+    ctx.lineTo(s*0.8,s*0.4); ctx.closePath(); ctx.fill();
+  } else if(kind==='frog' || kind==='frogcrown'){
+    ctx.beginPath(); ctx.ellipse(0,s*0.15,s*0.65,s*0.5,0,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(-s*0.4,-s*0.35,s*0.28,0,Math.PI*2); ctx.arc(s*0.4,-s*0.35,s*0.28,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#0d1420';
+    ctx.beginPath(); ctx.arc(-s*0.4,-s*0.35,s*0.12,0,Math.PI*2); ctx.arc(s*0.4,-s*0.35,s*0.12,0,Math.PI*2); ctx.fill();
+    if(kind==='frogcrown'){ ctx.fillStyle=col;
+      ctx.beginPath(); ctx.moveTo(-s*0.3,-s*0.65); ctx.lineTo(-s*0.15,-s*0.95); ctx.lineTo(0,-s*0.65);
+      ctx.lineTo(s*0.15,-s*0.95); ctx.lineTo(s*0.3,-s*0.65); ctx.closePath(); ctx.fill(); }
+  } else if(kind==='pillar'){
+    ctx.fillRect(-s*0.55,-s*0.7,s*1.1,s*0.22);
+    ctx.fillRect(-s*0.32,-s*0.4,s*0.64,s*1.0);
+    ctx.fillStyle='rgba(0,0,0,.3)'; ctx.fillRect(-s*0.32,s*0.1,s*0.64,s*0.16);
+  } else if(kind==='cloud'){
+    ctx.beginPath();
+    ctx.arc(-s*0.35,s*0.1,s*0.4,0,Math.PI*2); ctx.arc(s*0.15,-s*0.1,s*0.5,0,Math.PI*2);
+    ctx.arc(s*0.55,s*0.15,s*0.35,0,Math.PI*2); ctx.fill();
+    ctx.fillRect(-s*0.5,s*0.05,s*1.1,s*0.35);
+  } else if(kind==='tower'){
+    ctx.fillRect(-s*0.3,-s*0.3,s*0.6,s*1.0);
+    ctx.beginPath(); ctx.moveTo(-s*0.42,-s*0.3); ctx.lineTo(0,-s*0.9); ctx.lineTo(s*0.42,-s*0.3); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#ffe066'; ctx.fillRect(-s*0.1,s*0.15,s*0.2,s*0.3);
+  } else if(kind==='bolt'){
+    ctx.beginPath();
+    ctx.moveTo(s*0.15,-s*0.9); ctx.lineTo(-s*0.35,s*0.05); ctx.lineTo(-s*0.02,s*0.05);
+    ctx.lineTo(-s*0.2,s*0.9); ctx.lineTo(s*0.4,-s*0.15); ctx.lineTo(s*0.05,-s*0.15);
+    ctx.closePath(); ctx.fill();
+  }
+  ctx.restore();
+}
+function drawWorldMap(){
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#0d1826'); g.addColorStop(1,'#152a3f');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  // fasce colorate per mondo, cosi' si capisce subito il raggruppamento
+  [1,2,3].forEach(w=>{
+    const rowY = 80 + (w-1)*150;
+    ctx.fillStyle = hexA(WORLD_INFO[w].col, 0.08);
+    ctx.fillRect(0, rowY, W, 150);
+  });
+  ctx.textAlign='center';
+  ctx.font='bold 26px Courier New'; ctx.fillStyle='#ffd60a';
+  ctx.strokeStyle='#000'; ctx.lineWidth=4;
+  ctx.strokeText('SCEGLI IL LIVELLO', W/2, 38);
+  ctx.fillText('SCEGLI IL LIVELLO', W/2, 38);
+  // etichette di mondo a sinistra
+  [1,2,3].forEach(w=>{
+    const rowY = 155 + (w-1)*150;
+    ctx.textAlign='left'; ctx.font='bold 13px Courier New'; ctx.fillStyle=WORLD_INFO[w].col;
+    ctx.fillText('MONDO '+w, 14, rowY-52);
+  });
+  ctx.textAlign='center';
+  // percorso che collega i nodi
+  ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=7; ctx.setLineDash([2,12]); ctx.lineCap='round';
+  ctx.beginPath();
+  MAP_NODES.forEach((p,i)=>{ if(i===0) ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y); });
+  ctx.stroke(); ctx.setLineDash([]);
+  // nodi
+  MAP_NODES.forEach((p,i)=>{
+    const L = LEVELS[i];
+    const info = WORLD_INFO[L.world]||WORLD_INFO[1];
+    const isBoss = !!L.boss;
+    const done = clearedLevels.has(i);
+    const sel = i===mapSel;
+    const r = isBoss ? 40 : 32;
+    if(sel){ ctx.strokeStyle=info.col; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.arc(p.x,p.y,r+11+Math.sin(frame*0.15)*3,0,Math.PI*2); ctx.stroke(); }
+    ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.arc(p.x+3,p.y+4,r+6,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = info.col;
+    ctx.beginPath(); ctx.arc(p.x,p.y,r+6,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#10202f';
+    ctx.beginPath(); ctx.arc(p.x,p.y,r,0,Math.PI*2); ctx.fill();
+    drawNodeIcon(L.icon||'flower', p.x, p.y, isBoss?24:19, info.col);
+    if(done){
+      ctx.fillStyle='#2fbf5a'; ctx.beginPath(); ctx.arc(p.x+r-6,p.y-r+6,13,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#fff'; ctx.font='bold 14px Courier New'; ctx.fillText('✔', p.x+r-6, p.y-r+11);
+    }
+    // etichetta con sfondo per leggibilita'
+    let label = L.name;
+    const dotIdx = label.indexOf('. ');
+    if(dotIdx>=0 && dotIdx<3) label = label.slice(dotIdx+2);
+    label = label.replace('BOSS FINALE: ','').replace('BOSS: ','');
+    ctx.font='bold 13px Courier New';
+    const lw = Math.min(180, ctx.measureText(label).width+16);
+    ctx.fillStyle='rgba(0,0,0,.6)'; rr(p.x-lw/2, p.y+r+10, lw, 20, 6);
+    ctx.fillStyle='#fff';
+    ctx.fillText(label, p.x, p.y+r+24);
+  });
+  // omino che cammina sulla mappa (segue con un piccolo lag il nodo selezionato)
+  const target = MAP_NODES[mapSel];
+  mapAvatarX += (target.x - mapAvatarX)*0.25;
+  mapAvatarY += (target.y - 58 - mapAvatarY)*0.25;
+  const c = CHARS[charIdx];
+  ctx.fillStyle='rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(mapAvatarX,mapAvatarY+18,12,4,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = c.color;
+  ctx.beginPath(); ctx.arc(mapAvatarX, mapAvatarY+Math.sin(frame*0.2)*4, 15, 0, Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+  ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.arc(mapAvatarX-5,mapAvatarY-2+Math.sin(frame*0.2)*4,4.5,0,Math.PI*2);
+  ctx.arc(mapAvatarX+5,mapAvatarY-2+Math.sin(frame*0.2)*4,4.5,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#111';
+  ctx.beginPath(); ctx.arc(mapAvatarX-4,mapAvatarY-2+Math.sin(frame*0.2)*4,2,0,Math.PI*2);
+  ctx.arc(mapAvatarX+6,mapAvatarY-2+Math.sin(frame*0.2)*4,2,0,Math.PI*2); ctx.fill();
+  // scheda info livello selezionato
+  const selL = LEVELS[mapSel]; const selInfo = WORLD_INFO[selL.world]||WORLD_INFO[1];
+  ctx.fillStyle='rgba(0,0,0,.7)'; rr(W/2-280, H-56, 560, 48, 10);
+  ctx.strokeStyle=selInfo.col; ctx.lineWidth=2; ctx.strokeRect(W/2-280,H-56,560,48);
+  ctx.font='bold 16px Courier New'; ctx.fillStyle=selInfo.col;
+  ctx.fillText(selL.name, W/2, H-32);
+  ctx.font='12px Courier New'; ctx.fillStyle='#9ae6ff';
+  ctx.fillText('◀ ▶ muovi sulla mappa · SPAZIO per iniziare · ESC per tornare indietro', W/2, H-12);
+}
+function drawIntro(){
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#0a0518'); g.addColorStop(1,'#241040');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  for(let i=0;i<50;i++){ ctx.fillStyle='rgba(255,255,255,'+(0.15+((i*53)%60)/100)+')';
+    ctx.fillRect((i*173)%W, (i*211)%H, 2, 2); }
+  ctx.textAlign='center';
+  const t = Math.min(1, frame/50);
+  ctx.globalAlpha = t;
+  ctx.font='bold 26px Courier New'; ctx.fillStyle='#ffd60a';
+  ctx.fillText('C\'era una volta...', W/2, 130);
+  ctx.font='16px Courier New'; ctx.fillStyle='#fff';
+  wrapText('Nel pacifico Regno delle Bacche, tre eroi vivevano felici raccogliendo bacche magiche sotto il sole.', W/2, 200, 640, 26);
+  wrapText("Ma una notte, un'ombra è calata sul regno: le Bacche Magiche sono sparite, rubate una ad una da forze oscure sempre più potenti.", W/2, 270, 640, 26);
+  ctx.fillStyle='#ff9de0'; ctx.font='bold 17px Courier New';
+  wrapText('Solo tu puoi attraversare paludi, cieli in tempesta e affrontare chi ha orchestrato tutto questo... prima che sia troppo tardi!', W/2, 360, 640, 26);
+  if(frame>60){
+    ctx.font='bold 18px Courier New'; ctx.fillStyle='#7dff8a'; ctx.globalAlpha=1;
+    ctx.fillText("PREMI SPAZIO PER INIZIARE L'AVVENTURA", W/2, 470+Math.sin(frame*0.1)*3);
+  }
+  ctx.globalAlpha=1;
+}
+function drawCredits(){
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#0a0518'); g.addColorStop(1,'#2a1245');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  for(let i=0;i<60;i++){ ctx.fillStyle='rgba(255,214,10,'+(0.1+((i*41)%50)/100)+')';
+    ctx.fillRect((i*151+frame*0.3)%W, (i*173)%H, 2, 2); }
+  ctx.textAlign='center';
+  ctx.font='bold 34px Courier New'; ctx.fillStyle='#ffd60a';
+  ctx.fillText('★ FINE ★', W/2, 90+Math.sin(frame*0.05)*4);
+  ctx.font='16px Courier New'; ctx.fillStyle='#fff';
+  wrapText("L'Imperatore Fulmine è caduto. Le Bacche Magiche tornano a brillare nel Regno, e la pace regna di nuovo su prati, paludi e cieli.", W/2, 150, 640, 24);
+  ctx.fillStyle='#9ae6ff';
+  wrapText(CHARS[charIdx].name+' torna a casa da eroe, ma le storie più belle... a volte hanno un seguito.', W/2, 220, 640, 24);
+  ctx.font='bold 15px Courier New'; ctx.fillStyle='#ff9de0';
+  ctx.fillText('— SUPER BALDO: Il Regno delle Bacche —', W/2, 300);
+  ctx.font='13px Courier New'; ctx.fillStyle='#cbd5e1';
+  ctx.fillText('Un gioco originale creato con Claude', W/2, 330);
+  ctx.font='bold 20px Courier New'; ctx.fillStyle='#ffd60a';
+  ctx.fillText('PUNTEGGIO FINALE: '+score, W/2, 390);
+  ctx.font='bold 16px Courier New'; ctx.fillStyle='#7dff8a';
+  ctx.fillText('PREMI SPAZIO PER TORNARE AL MENU', W/2, 460+Math.sin(frame*0.1)*3);
+}
 function drawMenu(){
   const g = ctx.createLinearGradient(0,0,0,H);
   g.addColorStop(0,'#1a0f2e'); g.addColorStop(1,'#3d1f5c');
@@ -1053,6 +1340,18 @@ function drawMenu(){
   ctx.fillText('~ Il Regno delle Bacche ~', W/2, 140);
   ctx.font='16px Courier New'; ctx.fillStyle='#9ae6ff';
   ctx.fillText('Scegli il tuo eroe  (◀ ▶ poi SPAZIO / tocca)', W/2, 185);
+  // classifica
+  const scores = loadScores();
+  if(scores.length){
+    ctx.textAlign='left'; ctx.font='bold 13px Courier New'; ctx.fillStyle='#ffd60a';
+    ctx.fillText('★ TOP 5', W-190, 40);
+    ctx.font='12px Courier New';
+    scores.forEach((s,i)=>{
+      ctx.fillStyle = i===0?'#ffd60a':'#cbd5e1';
+      ctx.fillText((i+1)+'. '+s.name.padEnd(8,' ')+' '+s.score, W-190, 60+i*18);
+    });
+    ctx.textAlign='center';
+  }
   // card personaggi
   for(let i=0;i<3;i++){
     const c = CHARS[i];
@@ -1081,22 +1380,10 @@ function drawMenu(){
     drawStat(cx-80, cy+95, 'VEL', c.speed/1.4);
     drawStat(cx+10, cy+95, 'SALTO', c.jump/1.1);
   }
-  ctx.font='13px Courier New'; ctx.fillStyle='#9ae6ff'; ctx.textAlign='center';
-  ctx.fillText('Parti da:', W/2, 432);
-  for(let w=1; w<=3; w++){
-    const info = WORLD_INFO[w];
-    const bx = W/2 + (w-2)*170, by=452;
-    const sel = w===worldSel;
-    ctx.fillStyle = sel ? 'rgba(255,214,10,.25)' : 'rgba(255,255,255,.08)';
-    rr(bx-80, by-16, 160, 32, 8);
-    if(sel){ ctx.strokeStyle=info.col; ctx.lineWidth=2; ctx.strokeRect(bx-80,by-16,160,32); }
-    ctx.fillStyle = sel?info.col:'#cbd5e1'; ctx.font='bold 13px Courier New';
-    ctx.fillText('MONDO '+w, bx, by+5);
-  }
   ctx.font='bold 22px Courier New'; ctx.fillStyle='#7dff8a';
-  ctx.fillText('PREMI SPAZIO PER INIZIARE', W/2, 490+Math.sin(frame*0.1)*3);
+  ctx.fillText('PREMI SPAZIO PER SCEGLIERE IL LIVELLO', W/2, 450+Math.sin(frame*0.1)*3);
   ctx.font='13px Courier New'; ctx.fillStyle='#8899aa';
-  ctx.fillText('← → muovi · SPAZIO salta · X fiamma · tasti 1-2-3 per scegliere il mondo', W/2, 520);
+  ctx.fillText('◀ ▶ cambia eroe · ESC per tornare al titolo', W/2, 480);
 }
 function drawStat(x,y,label,v){
   ctx.textAlign='left'; ctx.font='11px Courier New'; ctx.fillStyle='#8899aa';
@@ -1125,22 +1412,67 @@ function overlayScreen(title, sub, col){
 
 /* ============================= UI HANDLERS ============================= */
 function handleUIKey(k){
+  if(state==='INTRO'){ if(k===' ') state='TITLE'; return; }
+  if(state==='TITLE'){
+    if(showQuitMsg){ if(k===' ') showQuitMsg=false; return; }
+    if(k==='ArrowUp'){ titleSel=(titleSel+2)%3; SFX.coin(); }
+    if(k==='ArrowDown'){ titleSel=(titleSel+1)%3; SFX.coin(); }
+    if(k===' '){
+      if(titleSel===0){ state='MENU'; SFX.power(); }
+      else if(titleSel===1){ state='SETTINGS'; SFX.coin(); }
+      else { try{ window.close(); }catch(e){} showQuitMsg=true; }
+    }
+    return;
+  }
+  if(state==='SETTINGS'){
+    if(k==='1'){ musicOn=!musicOn; SFX.coin(); }
+    if(k==='2'){ sfxOn=!sfxOn; SFX.coin(); }
+    if(k===' '||k==='Escape'){ state='TITLE'; }
+    return;
+  }
+  if(state==='CREDITS'){ if(k===' ') state='TITLE'; return; }
   if(state==='MENU'){
     if(k==='ArrowLeft') { charIdx=(charIdx+2)%3; SFX.coin(); }
     if(k==='ArrowRight'){ charIdx=(charIdx+1)%3; SFX.coin(); }
-    if(k==='1'||k==='2'||k==='3'){ worldSel=+k; SFX.coin(); }
-    if(k===' '){ score=0; coins=0; lives=3; player=null;
-      const startIdx = LEVELS.findIndex(l=>l.world===worldSel);
-      startLevel(startIdx>=0?startIdx:0); }
+    if(k==='Escape'){ state='TITLE'; }
+    if(k===' '){ mapSel = Math.min(mapSel, LEVELS.length-1); state='WORLDMAP'; SFX.power();
+      const p = MAP_NODES[mapSel]; mapAvatarX=p.x; mapAvatarY=p.y-46; }
+  } else if(state==='WORLDMAP'){
+    if(k==='ArrowLeft' || k==='ArrowUp'){ mapSel=Math.max(0,mapSel-1); SFX.coin(); }
+    if(k==='ArrowRight'|| k==='ArrowDown'){ mapSel=Math.min(LEVELS.length-1,mapSel+1); SFX.coin(); }
+    if(k==='Escape'){ state='MENU'; }
+    if(k===' '){ score=0; coins=0; lives=3; player=null; scoreSaved=false; startLevel(mapSel); }
   } else if(state==='WORLDCARD' && k===' '){ state='PLAY';
   } else if(state==='BOSSCARD' && k===' '){ state='PLAY';
   } else if(state==='WORLDEND' && k===' ' && worldEndT<190){ startLevel(levelIdx+1);
   } else if(state==='CLEAR' && k===' ' && clearTimer>40){
-    if(levelIdx+1<LEVELS.length) startLevel(levelIdx+1); else state='WIN';
-  } else if(state==='GAMEOVER' && k===' '){ state='MENU'; }
-  else if(state==='WIN' && k===' '){ state='MENU'; }
+    if(!LEVELS[levelIdx].finalBoss && levelIdx+1<LEVELS.length) startLevel(levelIdx+1);
+    else { state='CREDITS'; saveScoreIfHigh(score); frame=0; }
+  } else if(state==='GAMEOVER' && k===' '){ state='TITLE'; }
 }
 function handleClick(mx,my){
+  if(state==='TITLE'){
+    if(showQuitMsg){ handleUIKey(' '); return; }
+    const opts=['GIOCA','IMPOSTAZIONI','ESCI'];
+    for(let i=0;i<3;i++){ const y=300+i*70;
+      if(mx>W/2-140&&mx<W/2+140&&my>y-28&&my<y+28){ titleSel=i; handleUIKey(' '); return; } }
+    return;
+  }
+  if(state==='SETTINGS'){
+    if(mx>W/2-220&&mx<W/2+220&&my>190&&my<250){ handleUIKey('1'); return; }
+    if(mx>W/2-220&&mx<W/2+220&&my>270&&my<330){ handleUIKey('2'); return; }
+    handleUIKey(' '); return;
+  }
+  if(state==='WORLDMAP'){
+    for(let i=0;i<MAP_NODES.length;i++){
+      const p = MAP_NODES[i];
+      if(Math.hypot(mx-p.x,my-p.y)<32){
+        if(mapSel===i) handleUIKey(' '); else { mapSel=i; SFX.coin(); }
+        return;
+      }
+    }
+    return;
+  }
   if(state==='MENU'){
     for(let i=0;i<3;i++){
       const cx = W/2+(i-1)*250;
@@ -1150,11 +1482,7 @@ function handleClick(mx,my){
         return;
       }
     }
-    for(let w=1; w<=3; w++){
-      const bx = W/2 + (w-2)*170, by=452;
-      if(mx>bx-80&&mx<bx+80&&my>by-16&&my<by+16){ worldSel=w; SFX.coin(); return; }
-    }
-    if(my>475) handleUIKey(' ');
+    if(my>440) handleUIKey(' ');
   } else handleUIKey(' ');
 }
 
@@ -1168,7 +1496,8 @@ function tick(){
     if(world.boss && world.boss.dead && bossDeadT>0){
       bossDeadT--;
       if(bossDeadT<=0){
-        if(levelIdx+1>=LEVELS.length){ state='WIN'; }
+        clearedLevels.add(levelIdx);
+        if(LEVELS[levelIdx].finalBoss){ state='CREDITS'; saveScoreIfHigh(score); frame=0; }
         else if(LEVELS[levelIdx+1].world !== LEVELS[levelIdx].world){ state='WORLDEND'; worldEndT=210; }
         else { levelClear(); }
       }
@@ -1178,10 +1507,16 @@ function tick(){
   else if(state==='WORLDCARD'){ worldCardT--; if(worldCardT<=0) state='PLAY'; }
   else if(state==='BOSSCARD'){ bossCardT--; if(bossCardT<=0) state='PLAY'; }
   else if(state==='WORLDEND'){ worldEndT--; if(worldEndT<=0) startLevel(levelIdx+1); }
+  else if(state==='PAUSE'){ /* fisica congelata */ }
   // render
   ctx.save();
   if(shake>0){ shake--; ctx.translate((Math.random()-.5)*shake, (Math.random()-.5)*shake); }
   if(state==='MENU'){ drawMenu(); }
+  else if(state==='TITLE'){ drawTitle(); }
+  else if(state==='SETTINGS'){ drawSettings(); }
+  else if(state==='WORLDMAP'){ drawWorldMap(); }
+  else if(state==='INTRO'){ drawIntro(); }
+  else if(state==='CREDITS'){ drawCredits(); }
   else {
     drawSky(world.cfg); drawTiles(); drawStuff(); drawEnemies(); drawPlayer(); drawHUD();
     if(state==='WORLDCARD'){
@@ -1247,7 +1582,18 @@ function tick(){
         ctx.fillText('PREMI SPAZIO PER CONTINUARE', W/2, H/2+90+Math.sin(frame*0.1)*3);
       }
     }
-    if(state==='CLEAR') overlayScreen('LIVELLO COMPLETATO!', 'Bonus tempo: +'+Math.floor(timeLeft/60)*10+' punti', '#ffd60a');
+    if(state==='CLEAR') overlayScreen('LIVELLO COMPLETATO!',
+      'Bonus tempo: +'+Math.floor(timeLeft/60)*10+' punti'+(perfectCoins?'  ·  ★ MONETE PERFETTE! +1000':''), '#ffd60a');
+    if(state==='PAUSE'){
+      ctx.fillStyle='rgba(0,0,0,.65)'; ctx.fillRect(0,0,W,H);
+      ctx.textAlign='center';
+      ctx.font='bold 40px Courier New'; ctx.fillStyle='#ffd60a';
+      ctx.fillText('PAUSA', W/2, H/2-20);
+      ctx.font='bold 16px Courier New'; ctx.fillStyle='#7dff8a';
+      ctx.fillText('PREMI P PER RIPRENDERE', W/2, H/2+25);
+      ctx.font='13px Courier New'; ctx.fillStyle='#9ae6ff';
+      ctx.fillText('M: torna alla mappa del mondo', W/2, H/2+55);
+    }
     if(state==='GAMEOVER') overlayScreen('GAME OVER', 'Punteggio finale: '+score, '#ff4d6d');
     if(state==='WIN') overlayScreen('★ HAI VINTO! ★', 'Il Regno delle Bacche è salvo! Punti: '+score, '#7dff8a');
   }

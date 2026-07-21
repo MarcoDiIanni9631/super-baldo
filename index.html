@@ -110,15 +110,16 @@ const left  = ()=>keys['arrowleft']||keys['a'];
 const right = ()=>keys['arrowright']||keys['d'];
 const jumpK = ()=>keys['space']||keys['arrowup']||keys['w'];
 const fireK = ()=>keys['x']||keys['k'];
+const downK = ()=>keys['arrowdown']||keys['s'];
 
 /* ============================= PERSONAGGI ============================= */
 const CHARS = [
   { name:'BALDO',    desc:'Equilibrato e affidabile', color:'#ff5a36', color2:'#ffb08a',
-    speed:1.3, jump:1.34, hits:0, note:'Il classico eroe' },
+    speed:1.0, jump:1.0, hits:0, note:'Il classico eroe' },
   { name:'ZIPPA',    desc:'Velocissima, salto corto', color:'#2ee6d6', color2:'#b8fff7',
-    speed:1.50, jump:1.30, hits:0, note:'Corre come il vento' },
+    speed:1.38, jump:0.92, hits:0, note:'Corre come il vento' },
   { name:'BRONTOLO', desc:'Lento ma tosto: +1 cuore, spacca le casse', color:'#a06bff', color2:'#d8c2ff',
-    speed:0.82, jump:1.30, hits:1, note:'Un carro armato peloso' },
+    speed:0.82, jump:1.08, hits:1, note:'Un carro armato peloso' },
 ];
 
 /* ============================= LIVELLI =============================
@@ -128,24 +129,24 @@ const CHARS = [
    P start  F traguardo
 ==================================================================== */
 const LEVELS = [
-{ name:'1. PRATI SALTERINI', time:300, sky:['#66ccff','#cceeff'], hills:'#3fa34d',
+{ name:'1. PRATI SALTERINI', time:300, sky:['#66ccff','#cceeff'], hills:'#3fa34d', world:1,
 rows:[
 '                                                                                                                                                            ',
 '                                                                                                                                                            ',
 '                  c c c                                        ccc                                                                                          ',
-'                                        M                                            ?                                                                      ',
-'          ?                B?B                     =====                 B B B                          c c c                                      F        ',
-'                                                                                          ?M?                          =                          F        ',
+'                                                                                                                                                            ',
+'                           B B                     =====                 B B B                          c c c                                      F        ',
+'                                                                                                                       =                          F        ',
 '   P       ?                         c c        =                =                                    =======              =                       F        ',
-'                            e                                                  e   e                                            c c               F        ',
-'        c c          e            ====== =    =        c c c          ======                   j            s        =====          e    e        F        ',
+'          ?            ?    e                                         ?M?      e   e                                            c c M  ?          F        ',
+'        c c?         e            ====== =    =        c c c          ======                   j            s        =====          e    e        F        ',
 '                                                                ===                                                                                F        ',
 '################   ######### ##      ##   ##  ## ############ ### ############### ######   ######## ######## ####  #### ######  ##################X#####   ',
 '################   ######### ##      ##   ##  ## ############ ### ############### ######   ######## ######## ####  #### ######  ##################X#####   ',
 '################   ######### ##      ##   ##  ## ############ ### ############### ######   ######## ######## ####  #### ######  ##################X#####   ',
 '################   ######### ##      ##   ##  ## ############ ### ############### ######   ######## ######## ####  #### ######  ##################X#####   ',
 ]},
-{ name:'2. GROTTE ROVENTI', time:280, sky:['#2b1230','#5a1e3a'], hills:'#3a1226',
+{ name:'2. GROTTE ROVENTI', time:280, sky:['#2b1230','#5a1e3a'], hills:'#3a1226', world:1,
 rows:[
 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
 '                                                                                                                                            ',
@@ -160,14 +161,70 @@ rows:[
 'XXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLXXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXXXXX',
 'XXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLXXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXXXXX',
 ]},
-{ name:'3. CIELO TEMPESTOSO', time:280, sky:['#1a2a6c','#4a3f9f'], hills:'#26205e',
+{ name:'BOSS: RE MELMONE', time:200, sky:['#30071a','#6b0f2a'], hills:'#22030f', boss:true, world:1, bossKind:'melmone',
+rows:[
+'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX ',
+'X                                     X',
+'X                                     X',
+'X   M                            M    X',
+'X                                     X',
+'X  ===   XXXX          XXXX     ===  X ',
+'X                G                    X',
+'X  P                                  X',
+'X                                     X',
+'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX ',
+]},
+{ name:'3. PALUDE NEBBIOSA', time:300, sky:['#3a4a3a','#6a7a5a'], hills:'#2a3a24', hazard:['#4a7a2a','#8fce4a'], world:2,
+rows:[
+'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+'                                                                                                                                            ',
+'                                        c c c                           c c                                         c c c                   ',
+'                       M                                    ?                                  M           r      ^^                    F   ',
+'                      =====                               =====                               =====                           =====     F   ',
+'                                    r               B?B                                                                                 F   ',
+'   P        ====               ====             ====              ====              ====             ====             ====              F   ',
+'                    r     ^^                e                  s          r ^^              e     s          r ^^                       F   ',
+'XXXXXXXXXXXX    XXXXXXXXXXXXXX    XXXXXXXXXXXXXX   XXXXXXXXXXXXXXX    XXXXXXXXXXXXXX    XXXXXXXXXXXXX    XXXXXXXXXXXXX    XXXXXXXXXXXXXXXXXX',
+'XXXXXXXXXXXX    XXXXXXXXXXXXXX    XXXXXXXXXXXXXX   XXXXXXXXXXXXXXX    XXXXXXXXXXXXXX    XXXXXXXXXXXXX    XXXXXXXXXXXXX    XXXXXXXXXXXXXXXXXX',
+'XXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLXXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXXXXX',
+'XXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLXXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXXXXX',
+]},
+{ name:'4. ROVINE SOMMERSE', time:280, sky:['#2a3a44','#4a5a64'], hills:'#1e2a30', hazard:['#3a8a6a','#7adfc0'], world:2,
+rows:[
+'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+'                                                                                                                                            ',
+'                                        c c c                           c c                                         c c c                   ',
+'                       M                                    ?                                  M           s      ^^                    F   ',
+'                      =====                               =====                               =====                           =====     F   ',
+'                                    r               B?B                                                                                 F   ',
+'   P        ====               ====             ====              ====              ====             ====             ====              F   ',
+'                    e     ^^                f                  s          e ^^              f     s          e ^^                       F   ',
+'XXXXXXXXXXXX    XXXXXXXXXXXXXX    XXXXXXXXXXXXXX   XXXXXXXXXXXXXXX    XXXXXXXXXXXXXX    XXXXXXXXXXXXX    XXXXXXXXXXXXX    XXXXXXXXXXXXXXXXXX',
+'XXXXXXXXXXXX    XXXXXXXXXXXXXX    XXXXXXXXXXXXXX   XXXXXXXXXXXXXXX    XXXXXXXXXXXXXX    XXXXXXXXXXXXX    XXXXXXXXXXXXX    XXXXXXXXXXXXXXXXXX',
+'XXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLXXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXXXXX',
+'XXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLXXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXLLLLXXXXXXXXXXXXXXXXXX',
+]},
+{ name:'BOSS: BARONE RANOCCHIO', time:220, sky:['#0a2a1a','#1f5a2a'], hills:'#082010', boss:true, bossKind:'ranocchio', world:2,
+rows:[
+'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+'X                                        X',
+'X                                        X',
+'X   M                              M     X',
+'X                                        X',
+'X  ===   XXXX          XXXXX      ===   X ',
+'X                 G                     X ',
+'X  P                                    X ',
+'X                                        X',
+'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+]},
+{ name:'5. CIELO TEMPESTOSO', time:280, sky:['#1a2a6c','#4a3f9f'], hills:'#26205e', world:3,
 rows:[
 '                                                                                                                                            ',
 '                               c c c                                                   c c c                                                ',
 '                              =====                                                   =====                                                 ',
 '                  M                                    B?B               ?                          M                                  F    ',
 '                 ====                        ====                       ====                       ====                       ====     F    ',
-'            f                          f      c c                 f                          f                        f        c c     F    ',
+'            f                          f      c c      ===        f                          f                        f        c c     F    ',
 '   P      ===          ===           ===           ===          ===           ===          ===           ===          ===              F    ',
 '                              e                 j         e           s             e                           e            j         F    ',
 'XXXXXXXXXX   XXXXXXXXX    XXXXXXXXXX    XXXXXXXXXX    XXXXXXXXX    XXXXXXXXXX    XXXXXXXXX    XXXXXXXXXX    XXXXXXXXX    XXXXXXXXXXXXXXXXXXX',
@@ -175,24 +232,44 @@ rows:[
 '                                                                                                                                            ',
 '                                                                                                                                            ',
 ]},
-{ name:'BOSS: RE MELMONE', time:200, sky:['#30071a','#6b0f2a'], hills:'#22030f', boss:true,
+{ name:'6. TORRE DEI FULMINI', time:280, sky:['#241a3f','#5a3f9f'], hills:'#1a1430', world:3,
 rows:[
-'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-'X                                     X',
-'X                                     X',
-'X   M                            M    X',
-'X                                     X',
-'X        XXXX          XXXX          X',
-'X                G                    X',
-'X  P                                  X',
-'X                                     X',
-'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+'                                                                                                                                            ',
+'                               c c c                                                   c c c                                                ',
+'                              =====                                                   =====                                                 ',
+'                  M                                    B?B               ?                          M                                  F    ',
+'                 ====                        ====                       ====                       ====                       ====     F    ',
+'            f                          f      c c      ===        f                          f                        f        c c     F    ',
+'   P      ===          ===           ===           ===          ===           ===          ===           ===          ===              F    ',
+'                              e                 j         s           s             e                           s            j         F    ',
+'XXXXXXXXXX   XXXXXXXXX    XXXXXXXXXX    XXXXXXXXXX    XXXXXXXXX    XXXXXXXXXX    XXXXXXXXX    XXXXXXXXXX    XXXXXXXXX    XXXXXXXXXXXXXXXXXXX',
+'XXXXXXXXXX   XXXXXXXXX    XXXXXXXXXX    XXXXXXXXXX    XXXXXXXXX    XXXXXXXXXX    XXXXXXXXX    XXXXXXXXXX    XXXXXXXXX    XXXXXXXXXXXXXXXXXXX',
+'                                                                                                                                            ',
+'                                                                                                                                            ',
 ]},
-];
+{ name:'BOSS FINALE: IMPERATORE FULMINE', time:260, sky:['#150a30','#3a1a6a'], hills:'#0d0620', boss:true, bossKind:'fulmine', world:3,
+rows:[
+'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+'X                                                      X',
+'X                                                      X',
+'X   M                                              M   X',
+'X                                                      X',
+'X  ===                                           ===   X',
+'X                                                      X',
+'X                        G                            X ',
+'X  P                                                  X ',
+'X                                                      X',
+'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+]},
+]
 
 /* ============================= STATO GIOCO ============================= */
-let state = 'MENU';        // MENU, PLAY, CLEAR, GAMEOVER, WIN
-let charIdx = 0, levelIdx = 0;
+let state = 'MENU';        // MENU, PLAY, CLEAR, GAMEOVER, WIN, WORLDCARD
+let worldCardT = 0;
+let bossCardT = 0;
+let bossDeadT = 0;
+let worldEndT = 0;
+let charIdx = 0, levelIdx = 0, worldSel = 1;
 let score = 0, coins = 0, lives = 3, timeLeft = 0;
 let world = null, player = null, cam = {x:0,y:0};
 let particles = [], floats = [], shake = 0, clearTimer = 0, frame = 0;
@@ -208,11 +285,11 @@ function buildWorld(idx){
     const ch = rows[y][x]||' ';
     if(ch==='P'){ start={x,y}; rows[y][x]=' '; }
     if(ch==='F'){ flag={x,y}; rows[y][x]=' '; }
-    if('esfj'.includes(ch)){ ents.push(makeEnemy(ch,x,y)); rows[y][x]=' '; }
-    if(ch==='G'){ boss = makeBoss(x,y); ents.push(boss); rows[y][x]=' '; }
+    if('esfjr'.includes(ch)){ ents.push(makeEnemy(ch,x,y)); rows[y][x]=' '; }
+    if(ch==='G'){ boss = makeBoss(x,y,L.bossKind); ents.push(boss); rows[y][x]=' '; }
   }
   return { rows, w, h:rows.length, ents, start, flag, boss,
-           fireballs:[], items:[], cfg:L };
+           fireballs:[], items:[], warnings:[], cfg:L };
 }
 const tileAt = (w,x,y)=> (x<0) ? 'X' : ((y<0||y>=w.h||x>=w.w) ? ' ' : (w.rows[y][x]||' '));
 
@@ -222,30 +299,53 @@ function makeEnemy(ch,x,y){
   if(ch==='s'){ base.w=32; base.h=26; base.vx=-0.8; }
   if(ch==='f'){ base.fly=true; base.baseY=y*TILE; base.vx=-1.4; }
   if(ch==='j'){ base.vx=0; base.jumpT=60+Math.random()*40; base.homeX=x*TILE; }
+  if(ch==='r'){ base.vx=0; base.jumpT=50+Math.random()*30; base.homeX=x*TILE; base.w=28; base.h=26; }
   return base;
 }
-function makeBoss(x,y){
-  return { x:x*TILE, y:y*TILE-40, w:110, h:96, vx:0, vy:0, dead:0, type:'G',
-           hp:6, maxhp:6, phase:'idle', pt:90, flash:0, t:0 };
+const BOSS_PAL = {
+  melmone:   { body:'#8a1538', body2:'#c22853', crown:'#ffd60a' },
+  ranocchio: { body:'#2f6b1a', body2:'#5aa832', crown:'#e8ff8a' },
+  fulmine:   { body:'#3a2a6b', body2:'#6b46c9', crown:'#ffe066' },
+};
+const BOSS_NAMES = { melmone:'RE MELMONE', ranocchio:'BARONE RANOCCHIO', fulmine:'IMPERATORE FULMINE' };
+function makeBoss(x,y,kind){
+  kind = kind||'melmone';
+  const hp = kind==='melmone'?6:(kind==='ranocchio'?7:9);
+  return { x:x*TILE, y:y*TILE-40, w:110, h:96, vx:0, vy:0, dead:0, type:'G', kind,
+           hp, maxhp:hp, phase:'idle', pt:90, flash:0, t:0 };
 }
 function makePlayer(){
   const c = CHARS[charIdx];
   return { x:0, y:0, w:26, h:32, vx:0, vy:0, onGround:false, face:1,
-    big:false, flame:false, feather:false, shield:false, star:0,
-    extraHits:c.hits, jumps:0, coyote:0, jbuf:0, inv:0, fireCd:0,
+    big:false, flame:false, ice:false, feather:false, shield:false, star:0,
+    extraHits:c.hits, jumps:0, coyote:0, jbuf:0, inv:0, fireCd:0, pounding:false,
     dead:false, deadT:0, animT:0, c };
 }
 function spawnPlayer(){
   player = Object.assign(makePlayer(), player ? {
-    big:player.big, flame:player.flame, feather:player.feather,
+    big:player.big, flame:player.flame, ice:player.ice, feather:player.feather,
     shield:player.shield, extraHits:player.extraHits } : {});
   player.x = world.start.x*TILE+4; player.y = world.start.y*TILE;
   player.h = player.big ? 44 : 32;
   cam.x = Math.max(0, player.x - W/3); cam.y = 0;
 }
+const WORLD_INFO = {
+  1:{ title:'MONDO 1 · IL REGNO DELLE BACCHE', sub:'Le Bacche Magiche sono sparite nel nulla: solo un eroe può ritrovarle!', col:'#ffd60a' },
+  2:{ title:'MONDO 2 · LA PALUDE NEBBIOSA', sub:'Le orme portano nella palude: il Barone Ranocchio sa dove sono le bacche...', col:'#8fce4a' },
+  3:{ title:'MONDO 3 · IL CIELO IN TEMPESTA', sub:"Ultima tappa: la torre dell'Imperatore Fulmine, il vero ladro delle bacche!", col:'#9ae6ff' },
+};
+const BOSS_TAUNTS = {
+  melmone:   'RE MELMONE: "Le tue bacche ora sono MIE, gnam gnam!"',
+  ranocchio: 'BARONE RANOCCHIO: "Gre-gre! Nessuno passa la mia palude!"',
+  fulmine:   'IMPERATORE FULMINE: "Io ho rubato tutto! E tu non mi fermerai!"',
+};
 function startLevel(i){
+  const prevWorld = LEVELS[levelIdx] ? LEVELS[levelIdx].world : null;
   levelIdx = i; world = buildWorld(i); timeLeft = LEVELS[i].time*60;
-  particles=[]; floats=[]; spawnPlayer(); state='PLAY';
+  particles=[]; floats=[]; spawnPlayer();
+  if(LEVELS[i].world && LEVELS[i].world!==prevWorld){ state='WORLDCARD'; worldCardT=150; }
+  else if(LEVELS[i].boss){ state='BOSSCARD'; bossCardT=140; }
+  else state='PLAY';
 }
 
 /* ============================= PARTICELLE ============================= */
@@ -297,7 +397,7 @@ function hitBlock(tx,ty,ch){
     if(coins>=50){ coins-=50; lives++; SFX.power(); floatText(px,py-20,'1UP!','#7dff8a'); }
   } else if(ch==='M'){
     world.rows[ty][tx]='X'; SFX.power();
-    const pool = ['bacca','fiamma','piuma','stella','scudo'];
+    const pool = ['bacca','fiamma','ghiaccio','piuma','stella','scudo'];
     const kind = pool[Math.floor(Math.random()*pool.length)];
     world.items.push({ x:tx*TILE+4, y:ty*TILE-30, w:28, h:28, vx:1.2, vy:-3, kind });
     puff(px,py,'#ff9de0',10);
@@ -313,6 +413,7 @@ function hitBlock(tx,ty,ch){
 const ITEM_INFO = {
   bacca:{ col:'#ff4d6d', label:'BACCA GIGANTE' },
   fiamma:{ col:'#ff9f1c', label:'FIAMMA' },
+  ghiaccio:{ col:'#9ae6ff', label:'BACCA GHIACCIO' },
   piuma:{ col:'#4cc9f0', label:'PIUMA DOPPIA' },
   stella:{ col:'#ffd60a', label:'SUPER STELLA' },
   scudo:{ col:'#57e389', label:'SCUDO' },
@@ -322,6 +423,7 @@ function applyItem(kind){
   floatText(player.x, player.y-26, ITEM_INFO[kind].label, ITEM_INFO[kind].col);
   if(kind==='bacca'){ if(!player.big){ player.big=true; player.h=44; player.y-=12; } }
   if(kind==='fiamma') player.flame = true;
+  if(kind==='ghiaccio') player.ice = true;
   if(kind==='piuma') player.feather = true;
   if(kind==='stella'){ player.star = 8*60; }
   if(kind==='scudo'){ player.shield = true; SFX.shield(); }
@@ -330,6 +432,7 @@ function hurtPlayer(){
   if(player.inv>0 || player.star>0 || player.dead) return;
   if(player.shield){ player.shield=false; SFX.shield(); player.inv=90; puff(player.x+13,player.y+16,'#57e389',12); return; }
   if(player.flame){ player.flame=false; SFX.hurt(); player.inv=90; return; }
+  if(player.ice){ player.ice=false; SFX.hurt(); player.inv=90; return; }
   if(player.big){ player.big=false; player.h=32; SFX.hurt(); player.inv=90; return; }
   if(player.extraHits>0){ player.extraHits--; SFX.hurt(); player.inv=90; return; }
   killPlayer();
@@ -353,7 +456,7 @@ function updatePlayer(){
     return;
   }
   // corsa
-  const acc = 0.6*c.speed, maxV = 4.6*c.speed;
+  const acc = 0.85*c.speed, maxV = 6.6*c.speed;
   if(left()){ p.vx -= acc; p.face=-1; } else if(right()){ p.vx += acc; p.face=1; }
   else p.vx *= p.onGround ? 0.78 : 0.94;
   p.vx = Math.max(-maxV, Math.min(maxV, p.vx));
@@ -361,22 +464,35 @@ function updatePlayer(){
   p.coyote = p.onGround ? 7 : Math.max(0,p.coyote-1);
   p.jbuf = jumpK() ? (p.jbufHeld ? p.jbuf : 7) : 0;
   if(jumpK() && !p.jbufHeld){
-    if(p.coyote>0){ p.vy = -11.6*c.jump; p.jumps=1; SFX.jump(); puff(p.x+13,p.y+p.h,'#fff',5,2); }
-    else if(p.feather && p.jumps===1){ p.vy = -10.2*c.jump; p.jumps=2; SFX.jump2(); puff(p.x+13,p.y+p.h,'#4cc9f0',8,2); }
+    if(p.coyote>0){ p.vy = -13.6*c.jump; p.jumps=1; SFX.jump(); puff(p.x+13,p.y+p.h,'#fff',5,2); }
+    else if(p.feather && p.jumps===1){ p.vy = -12.0*c.jump; p.jumps=2; SFX.jump2(); puff(p.x+13,p.y+p.h,'#4cc9f0',8,2); }
   }
   p.jbufHeld = jumpK();
   if(!jumpK() && p.vy < -6.5) p.vy = -6.5; // salto variabile (con minimo dignitoso)
   p.vy = Math.min(MAXFALL, p.vy + GRAV);
-  // fuoco
+  // picchiata (ground pound)
+  if(downK() && !p.onGround && !p.pounding && !p.dead){ p.pounding=true; SFX.stomp(); }
+  if(p.pounding) p.vy = 17;
+  // fuoco / ghiaccio
   p.fireCd = Math.max(0,p.fireCd-1);
-  if(p.flame && fireK() && p.fireCd===0){
+  if((p.flame||p.ice) && fireK() && p.fireCd===0){
     p.fireCd = 22; SFX.fire();
     world.fireballs.push({ x:p.x+(p.face>0?p.w:-10), y:p.y+10, w:12, h:12,
-      vx:8*p.face, vy:-2, life:80 });
+      vx:8*p.face, vy:-2, life:80, kind: p.flame?'fuoco':'ghiaccio' });
   }
   p.bumped = null;
   moveEntity(p, true);
   if(p.onGround) p.jumps = 0;
+  if(p.pounding && p.onGround){
+    p.pounding=false; shake=14; SFX.stomp();
+    puff(p.x+p.w/2,p.y+p.h,'#e8d9c0',18,5);
+    const cx=Math.floor((p.x+p.w/2)/TILE), cy=Math.floor((p.y+p.h+2)/TILE);
+    for(let dx=-2; dx<=2; dx++){ const tx=cx+dx;
+      if(tileAt(world,tx,cy)==='B'){ world.rows[cy][tx]=' '; addScore(50,tx*TILE,cy*TILE); SFX.brick();
+        puff(tx*TILE+18,cy*TILE+18,'#b5793d',10,4); } }
+    for(const en of world.ents){ if(!en.dead && en.type!=='G' && Math.abs(en.x-p.x)<95 && Math.abs((en.y)-(p.y+p.h))<55){
+      en.dead=1; addScore(200,en.x,en.y); SFX.stomp(); puff(en.x+15,en.y+15,'#fff',8); } }
+  }
   if(p.bumped) hitBlock(p.bumped.tx, p.bumped.ty, p.bumped.ch);
   // tile speciali
   rectVsTiles(p,(tx,ty,ch)=>{
@@ -406,14 +522,22 @@ function updateEnemies(){
   for(const e of world.ents){
     if(e.dead){ e.dead++; e.y += 3; continue; }
     e.t++;
+    if(e.frozen>0){
+      e.frozen--; e.vy = Math.min(MAXFALL, e.vy+GRAV); e.hitWall=false; moveEntity(e);
+      if(!player.dead && player.inv===0 && overlap(player,e)){
+        const falling = player.vy > 1 && (player.y+player.h) - e.y < 22;
+        if(falling || player.star>0){ e.dead=1; player.vy=-9; SFX.stomp(); addScore(400,e.x,e.y); puff(e.x+15,e.y+15,'#9ae6ff',10); }
+      }
+      continue;
+    }
     if(e.type==='G'){ updateBoss(e); continue; }
     if(e.type==='f'){
       e.x += e.vx; e.y = e.baseY + Math.sin(e.t*0.05)*46;
       const aheadCh = tileAt(world, Math.floor((e.x+(e.vx<0?-2:e.w+2))/TILE), Math.floor((e.y+e.h/2)/TILE));
       if(e.x < 0 || SOLID(aheadCh)) e.vx*=-1;
-    } else if(e.type==='j'){
+    } else if(e.type==='j' || e.type==='r'){
       e.vy = Math.min(MAXFALL, e.vy+GRAV);
-      if(e.onGround){ e.jumpT--; if(e.jumpT<=0){ e.vy=-9.5; e.jumpT=70+Math.random()*50;
+      if(e.onGround){ e.jumpT--; if(e.jumpT<=0){ e.vy = e.type==='r'?-8:-9.5; e.jumpT=(e.type==='r'?45:70)+Math.random()*(e.type==='r'?30:50);
         const near = Math.abs(player.x-e.x)<380;
         const tgt = near ? player.x : e.homeX;   // insegue solo da vicino, poi torna a casa
         e.vx = (tgt>e.x?1:-1)*(near?1.6:1.2); } else e.vx=0; }
@@ -445,17 +569,49 @@ function updateEnemies(){
 function updateBoss(b){
   b.t++; b.pt--; if(b.flash>0) b.flash--;
   const dir = player.x > b.x ? 1 : -1;
+  const enraged = b.hp <= Math.ceil(b.maxhp/2);
+  if(enraged && !b.enragedAnnounced){ b.enragedAnnounced=true; shake=18; SFX.boss();
+    const msg = b.kind==='fulmine' ? 'SI SCATENA LA TEMPESTA!' : (b.kind==='ranocchio' ? 'IL BARONE INFURIA!' : 'RE MELMONE SI INFURIA!');
+    floatText(b.x+b.w/2, b.y-10, msg, '#ff4d6d'); }
+  const jumpSpeed = -13 - (b.kind==='fulmine' ? 2 : 0);
   if(b.phase==='idle'){
     b.vx *= 0.9;
-    if(b.pt<=0){ b.phase = (b.hp<=3 && Math.random()<0.4) ? 'spawn' : 'jump'; b.pt=1; }
+    if(b.pt<=0){
+      const r = Math.random();
+      if(b.kind==='fulmine'){
+        if(enraged && r<0.45) b.phase='bolt2';
+        else if(r<0.75) b.phase='bolt';
+        else b.phase='jump';
+      } else if(b.kind==='ranocchio'){
+        if(r < (enraged?0.55:0.4)) b.phase='spit';
+        else b.phase='jump';
+      } else {
+        if(enraged && r<0.35) b.phase='spit';
+        else if(b.hp<=3 && r<0.7) b.phase='spawn';
+        else b.phase='jump';
+      }
+      b.pt=1;
+    }
   } else if(b.phase==='jump'){
-    if(b.onGround){ b.vy = -13; b.vx = dir* (2.2 + (6-b.hp)*0.35); SFX.boss(); b.phase='air'; }
+    if(b.onGround){ b.vy = jumpSpeed; b.vx = dir*(2.2+(b.maxhp-b.hp)*0.35); SFX.boss(); b.phase='air'; }
   } else if(b.phase==='air'){
-    if(b.onGround && b.vy>=0){ shake=12; SFX.boss(); puff(b.x+b.w/2,b.y+b.h,'#8a1538',16,5);
-      b.phase='idle'; b.pt = 60 + Math.random()*50; b.vx=0; }
+    if(b.onGround && b.vy>=0){ shake=enraged?16:12; SFX.boss();
+      puff(b.x+b.w/2,b.y+b.h,(BOSS_PAL[b.kind]||BOSS_PAL.melmone).body,16,5);
+      b.phase='idle'; b.pt=(enraged?36:58)+Math.random()*40; b.vx=0; }
   } else if(b.phase==='spawn'){
-    world.ents.push(makeEnemy('e', Math.floor((b.x+b.w/2)/TILE), Math.floor(b.y/TILE)));
+    world.ents.push(makeEnemy(b.kind==='ranocchio'?'r':'e', Math.floor((b.x+b.w/2)/TILE), Math.floor(b.y/TILE)));
     SFX.boss(); b.phase='idle'; b.pt=90;
+  } else if(b.phase==='spit'){
+    const kindProj = b.kind==='ranocchio' ? 'veleno' : 'fuoco';
+    world.fireballs.push({ x:b.x+b.w/2, y:b.y+30, w:14, h:14, vx:6*dir, vy:-4, life:75, kind:kindProj, hostile:true });
+    SFX.fire(); b.phase='idle'; b.pt=55;
+  } else if(b.phase==='bolt' || b.phase==='bolt2'){
+    const n = b.phase==='bolt2' ? 2 : 1;
+    for(let i=0;i<n;i++){
+      const tx = i===0 ? player.x : player.x + (Math.random()-.5)*220;
+      world.warnings.push({ x: tx, t: 34 });
+    }
+    SFX.hurt(); b.phase='idle'; b.pt=90;
   }
   b.vy = Math.min(MAXFALL, b.vy+GRAV);
   moveEntity(b);
@@ -469,29 +625,47 @@ function damageBoss(b){
   if(b.flash>0) return;
   b.hp--; b.flash=40; SFX.stomp(); shake=10; addScore(500,b.x+b.w/2,b.y);
   puff(b.x+b.w/2,b.y+20,'#ff4d6d',16,5);
-  if(b.hp<=0){ b.dead=1; addScore(5000,b.x,b.y); SFX.flag();
-    setTimeout(()=>{ state='WIN'; },900); }
+  if(b.hp<=0){ b.dead=1; addScore(5000,b.x,b.y); SFX.flag(); bossDeadT=54; }
 }
 
 function updateStuff(){
   // fireballs
+  const projCol = k => k==='ghiaccio'?'#9ae6ff': k==='veleno'?'#9b5de5': k==='fulmine'?'#ffe066' : '#ff9f1c';
   for(const f of world.fireballs){
     f.life--; f.vy = Math.min(9, f.vy+0.35);
     f.x += f.vx; f.y += f.vy;
     const tch = tileAt(world, Math.floor((f.x+6)/TILE), Math.floor((f.y+12)/TILE));
-    if(SOLID(tch)){ f.vy = -6; }
+    if(SOLID(tch)){ if(f.noBounce){ f.life=0; puff(f.x,f.y,projCol(f.kind),8); } else f.vy = -6; }
     const sideCh = tileAt(world, Math.floor((f.x+(f.vx>0?12:0))/TILE), Math.floor((f.y+6)/TILE));
-    if(SOLID(sideCh)){ f.life=0; puff(f.x,f.y,'#ff9f1c',6); }
-    for(const e of world.ents){
-      if(!e.dead && overlap(f,e)){
-        f.life=0; puff(f.x,f.y,'#ff9f1c',8);
-        if(e.type==='G') damageBoss(e);
-        else { e.dead=1; SFX.stomp(); addScore(200,e.x,e.y); }
+    if(SOLID(sideCh)){ f.life=0; puff(f.x,f.y,projCol(f.kind),6); }
+    if(f.hostile){
+      if(!player.dead && player.inv===0 && overlap(f,player)){
+        f.life=0; puff(f.x,f.y,projCol(f.kind),8); hurtPlayer();
+      }
+    } else {
+      for(const e of world.ents){
+        if(!e.dead && overlap(f,e)){
+          f.life=0; puff(f.x,f.y,projCol(f.kind),8);
+          if(e.type==='G'){ if(f.kind!=='ghiaccio') damageBoss(e); else { e.flash=15; SFX.hurt(); } }
+          else if(f.kind==='ghiaccio'){ if(e.frozen>0){ e.dead=1; SFX.stomp(); addScore(300,e.x,e.y); }
+            else { e.frozen=170; e.vx=0; SFX.shield(); } }
+          else { e.dead=1; SFX.stomp(); addScore(200,e.x,e.y); }
+        }
       }
     }
     if(f.life<=0 || f.y>world.h*TILE) f.gone=true;
   }
   world.fireballs = world.fireballs.filter(f=>!f.gone);
+  // avvisi fulmine (telegrafo prima dello strike)
+  for(const w of world.warnings){
+    w.t--;
+    if(w.t===10) SFX.fire();
+    if(w.t<=0){
+      world.fireballs.push({ x:w.x, y:0, w:14, h:26, vx:0, vy:6, life:120, kind:'fulmine', hostile:true, noBounce:true });
+      w.gone=true;
+    }
+  }
+  world.warnings = world.warnings.filter(w=>!w.gone);
   // items
   for(const it of world.items){
     it.vy = Math.min(8, it.vy+0.3);
@@ -525,19 +699,40 @@ function drawSky(cfg){
   const g = ctx.createLinearGradient(0,0,0,H);
   g.addColorStop(0,cfg.sky[0]); g.addColorStop(1,cfg.sky[1]);
   ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-  // colline parallasse
-  ctx.fillStyle = cfg.hills;
-  for(let i=0;i<8;i++){
-    const hx = ((i*340 - cam.x*0.3)%(W+400))-200;
-    ctx.beginPath(); ctx.arc(hx, H-40, 150+((i*77)%90), Math.PI, 0); ctx.fill();
+  const w = cfg.world||1;
+
+  if(w===3){
+    // MONDO 3: lampi in lontananza + sagome di torri
+    if(Math.random()<0.01){ ctx.fillStyle='rgba(255,255,255,.18)'; ctx.fillRect(0,0,W,H); }
+    ctx.fillStyle = cfg.hills;
+    for(let i=0;i<6;i++){
+      const hx = ((i*300 - cam.x*0.25)%(W+300))-150;
+      rr(hx-20, H-160, 40, 160, 4); rr(hx-30, H-120, 60, 120, 4);
+    }
+  } else if(w===2){
+    // MONDO 2: canne di palude + nebbia
+    ctx.fillStyle = cfg.hills;
+    for(let i=0;i<10;i++){
+      const hx = ((i*180 - cam.x*0.3)%(W+200))-100;
+      const hh = 60+((i*53)%50);
+      rr(hx-3, H-hh, 6, hh, 2); rr(hx-14, H-hh+14, 28, 10, 5);
+    }
+  } else {
+    // MONDO 1: colline morbide
+    ctx.fillStyle = cfg.hills;
+    for(let i=0;i<8;i++){
+      const hx = ((i*340 - cam.x*0.3)%(W+400))-200;
+      ctx.beginPath(); ctx.arc(hx, H-40, 150+((i*77)%90), Math.PI, 0); ctx.fill();
+    }
   }
-  // nuvole / stelle
-  ctx.fillStyle='rgba(255,255,255,.75)';
+  // nuvole / stelle / nebbia a seconda del mondo
   for(let i=0;i<7;i++){
     const nx = ((i*290 - cam.x*0.15 + 9999)%(W+300))-150;
     const ny = 40 + (i*53)%140;
-    if(levelIdx===1){ ctx.fillRect(nx,ny,3,3); }
-    else { rr(nx,ny,90,24,12); rr(nx+20,ny-14,50,22,11); }
+    if(levelIdx===1){ ctx.fillStyle='rgba(255,255,255,.75)'; ctx.fillRect(nx,ny,3,3); }
+    else if(w===2){ ctx.fillStyle='rgba(220,255,210,.25)'; rr(nx,ny+60,140,30,15); }
+    else if(w===3){ ctx.fillStyle='rgba(255,255,255,.55)'; rr(nx,ny,70,16,8); rr(nx+16,ny-10,36,16,8); }
+    else { ctx.fillStyle='rgba(255,255,255,.75)'; rr(nx,ny,90,24,12); rr(nx+20,ny-14,50,22,11); }
   }
 }
 function drawTiles(){
@@ -576,10 +771,11 @@ function drawTiles(){
         ctx.moveTo(x+i*12, y+TILE); ctx.lineTo(x+i*12+6, y+8); ctx.lineTo(x+i*12+12, y+TILE);
         ctx.fill(); } }
     else if(ch==='L'){
-      ctx.fillStyle='#ff4400'; ctx.fillRect(x,y+6,TILE,TILE-6);
-      ctx.fillStyle='#ffaa00';
+      const hz = world.cfg.hazard || ['#ff4400','#ffaa00'];
+      ctx.fillStyle=hz[0]; ctx.fillRect(x,y+6,TILE,TILE-6);
+      ctx.fillStyle=hz[1];
       ctx.fillRect(x, y+4+Math.sin(frame*0.15+tx)*3, TILE, 6);
-      if(Math.random()<0.02) puff(x+Math.random()*TILE, y+4, '#ffaa00',1,1.5); }
+      if(Math.random()<0.02) puff(x+Math.random()*TILE, y+4, hz[1],1,1.5); }
   }
   // bandiera traguardo
   if(world.flag){
@@ -622,8 +818,10 @@ function drawPlayer(){
     ctx.fillStyle=col;
     ctx.fillRect(x+4, y+p.h-3+s*0.5, 7, 5); ctx.fillRect(x+p.w-11, y+p.h-3-s*0.5, 7, 5);
   }
-  // fiamma in mano
+  // fiamma / ghiaccio in mano
   if(p.flame && !p.dead){ ctx.fillStyle='#ff9f1c';
+    ctx.beginPath(); ctx.arc(x+(p.face>0?p.w+3:-3), y+p.h*0.6, 4+Math.sin(frame*0.3)*1.5, 0, Math.PI*2); ctx.fill(); }
+  if(p.ice && !p.dead){ ctx.fillStyle='#9ae6ff';
     ctx.beginPath(); ctx.arc(x+(p.face>0?p.w+3:-3), y+p.h*0.6, 4+Math.sin(frame*0.3)*1.5, 0, Math.PI*2); ctx.fill(); }
   ctx.restore();
 }
@@ -634,27 +832,67 @@ function drawEnemies(){
     ctx.save();
     if(e.dead){ ctx.globalAlpha = Math.max(0,1-e.dead/40); ctx.translate(x+e.w/2,y+e.h/2); ctx.scale(1,-1); ctx.translate(-(x+e.w/2),-(y+e.h/2)); }
     if(e.type==='G'){
-      // RE MELMONE
+      const pal = BOSS_PAL[e.kind]||BOSS_PAL.melmone;
       if(e.flash>0 && frame%4<2) ctx.globalAlpha=0.4;
       const squish = e.onGround ? Math.sin(e.t*0.1)*4 : -8;
-      ctx.fillStyle='#8a1538'; rr(x, y+squish, e.w, e.h-squish, 28);
-      ctx.fillStyle='#c22853'; rr(x+12, y+24+squish*0.5, e.w-24, e.h-40, 20);
-      // corona
-      ctx.fillStyle='#ffd60a';
-      ctx.beginPath();
-      ctx.moveTo(x+28,y+squish); ctx.lineTo(x+34,y-18+squish); ctx.lineTo(x+44,y-4+squish);
-      ctx.lineTo(x+55,y-20+squish); ctx.lineTo(x+66,y-4+squish); ctx.lineTo(x+76,y-18+squish);
-      ctx.lineTo(x+82,y+squish); ctx.fill();
-      // occhi cattivi
-      ctx.fillStyle='#fff';
-      ctx.beginPath(); ctx.arc(x+36,y+34+squish,9,0,Math.PI*2); ctx.arc(x+74,y+34+squish,9,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle='#111';
       const dx = player.x>e.x?3:-3;
-      ctx.beginPath(); ctx.arc(x+36+dx,y+35+squish,4,0,Math.PI*2); ctx.arc(x+74+dx,y+35+squish,4,0,Math.PI*2); ctx.fill();
-      ctx.strokeStyle='#111'; ctx.lineWidth=3;
-      ctx.beginPath(); ctx.moveTo(x+26,y+22+squish); ctx.lineTo(x+44,y+28+squish);
-      ctx.moveTo(x+84,y+22+squish); ctx.lineTo(x+66,y+28+squish); ctx.stroke();
-      ctx.beginPath(); ctx.arc(x+55,y+60+squish,12,0.2,Math.PI-0.2); ctx.stroke();
+
+      if(e.kind==='ranocchio'){
+        // BARONE RANOCCHIO: corpo tozzo e rotondo, occhioni in cima, zampe palmate
+        ctx.fillStyle=pal.body; rr(x, y+18+squish, e.w, e.h-18-squish, 34);
+        ctx.fillStyle=pal.body2; rr(x+10, y+40+squish*0.5, e.w-20, e.h-52, 22);
+        // zampe palmate
+        ctx.fillStyle=pal.body;
+        for(const lx of [x+10,x+e.w-34]){ rr(lx, y+e.h-14, 24, 16, 8);
+          for(let i=0;i<3;i++){ ctx.beginPath(); ctx.arc(lx+6+i*7, y+e.h, 5,0,Math.PI*2); ctx.fill(); } }
+        // occhioni sporgenti in cima
+        ctx.fillStyle='#fff';
+        ctx.beginPath(); ctx.arc(x+30,y+10+squish,17,0,Math.PI*2); ctx.arc(x+e.w-30,y+10+squish,17,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#183a0a';
+        ctx.beginPath(); ctx.arc(x+30+dx,y+11+squish,8,0,Math.PI*2); ctx.arc(x+e.w-30+dx,y+11+squish,8,0,Math.PI*2); ctx.fill();
+        // cilindro da barone
+        ctx.fillStyle='#1a2a12'; rr(x+e.w/2-16,y-24+squish,32,18,3);
+        ctx.fillStyle=pal.crown; rr(x+e.w/2-20,y-8+squish,40,6,2);
+        // bocca larga
+        ctx.strokeStyle='#183a0a'; ctx.lineWidth=3;
+        ctx.beginPath(); ctx.arc(x+e.w/2,y+52+squish,22,0.15,Math.PI-0.15); ctx.stroke();
+      } else if(e.kind==='fulmine'){
+        // IMPERATORE FULMINE: alto, mantello, corona a saetta, occhi che brillano
+        ctx.fillStyle=pal.body2; // mantello dietro
+        ctx.beginPath(); ctx.moveTo(x+6,y-4+squish); ctx.lineTo(x-8,y+e.h+squish);
+        ctx.lineTo(x+e.w+8,y+e.h+squish); ctx.lineTo(x+e.w-6,y-4+squish); ctx.closePath(); ctx.fill();
+        ctx.fillStyle=pal.body; rr(x+16, y+8+squish, e.w-32, e.h-16-squish, 22);
+        ctx.fillStyle=pal.crown;
+        ctx.beginPath(); // corona a fulmine
+        ctx.moveTo(x+e.w/2-6,y-38+squish); ctx.lineTo(x+e.w/2+14,y-38+squish);
+        ctx.lineTo(x+e.w/2-2,y-14+squish); ctx.lineTo(x+e.w/2+10,y-14+squish);
+        ctx.lineTo(x+e.w/2-14,y+14+squish); ctx.lineTo(x+e.w/2-4,y-8+squish);
+        ctx.lineTo(x+e.w/2-16,y-8+squish); ctx.closePath(); ctx.fill();
+        // occhi luminosi
+        ctx.fillStyle='#fff9d6';
+        ctx.beginPath(); ctx.arc(x+e.w/2-16,y+40+squish,7,0,Math.PI*2); ctx.arc(x+e.w/2+16,y+40+squish,7,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#ffe066';
+        ctx.beginPath(); ctx.arc(x+e.w/2-16+dx,y+40+squish,3.5,0,Math.PI*2); ctx.arc(x+e.w/2+16+dx,y+40+squish,3.5,0,Math.PI*2); ctx.fill();
+        ctx.strokeStyle='#1a1030'; ctx.lineWidth=2;
+        ctx.beginPath(); ctx.arc(x+e.w/2,y+64+squish,14,0.2,Math.PI-0.2); ctx.stroke();
+      } else {
+        // RE MELMONE: gelatina tonda con corona classica
+        ctx.fillStyle=pal.body; rr(x, y+squish, e.w, e.h-squish, 28);
+        ctx.fillStyle=pal.body2; rr(x+12, y+24+squish*0.5, e.w-24, e.h-40, 20);
+        ctx.fillStyle=pal.crown;
+        ctx.beginPath();
+        ctx.moveTo(x+28,y+squish); ctx.lineTo(x+34,y-18+squish); ctx.lineTo(x+44,y-4+squish);
+        ctx.lineTo(x+55,y-20+squish); ctx.lineTo(x+66,y-4+squish); ctx.lineTo(x+76,y-18+squish);
+        ctx.lineTo(x+82,y+squish); ctx.fill();
+        ctx.fillStyle='#fff';
+        ctx.beginPath(); ctx.arc(x+36,y+34+squish,9,0,Math.PI*2); ctx.arc(x+74,y+34+squish,9,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#111';
+        ctx.beginPath(); ctx.arc(x+36+dx,y+35+squish,4,0,Math.PI*2); ctx.arc(x+74+dx,y+35+squish,4,0,Math.PI*2); ctx.fill();
+        ctx.strokeStyle='#111'; ctx.lineWidth=3;
+        ctx.beginPath(); ctx.moveTo(x+26,y+22+squish); ctx.lineTo(x+44,y+28+squish);
+        ctx.moveTo(x+84,y+22+squish); ctx.lineTo(x+66,y+28+squish); ctx.stroke();
+        ctx.beginPath(); ctx.arc(x+55,y+60+squish,12,0.2,Math.PI-0.2); ctx.stroke();
+      }
     } else if(e.type==='e'){
       ctx.fillStyle='#8d6a3f'; rr(x,y+6,e.w,e.h-6,10);
       ctx.fillStyle='#5c4327'; rr(x+3,y+e.h-8,8,8,3); rr(x+e.w-11,y+e.h-8,8,8,3);
@@ -684,11 +922,33 @@ function drawEnemies(){
       ctx.fillStyle='#5eb04a'; rr(x,y+sq,e.w,e.h-sq,12);
       ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(x+10,y+12+sq,5,0,Math.PI*2); ctx.arc(x+e.w-10,y+12+sq,5,0,Math.PI*2); ctx.fill();
       ctx.fillStyle='#111'; ctx.beginPath(); ctx.arc(x+10,y+13+sq,2.5,0,Math.PI*2); ctx.arc(x+e.w-10,y+13+sq,2.5,0,Math.PI*2); ctx.fill();
+    } else if(e.type==='r'){
+      const sq = e.onGround ? 5 : -5;
+      ctx.fillStyle='#7fd94a'; rr(x,y+4+sq,e.w,e.h-4-sq,10);
+      ctx.fillStyle='#5aa832'; rr(x+2,y+e.h-6,e.w-4,6,3);
+      ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(x+7,y+2+sq,5,0,Math.PI*2); ctx.arc(x+e.w-7,y+2+sq,5,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#2a6b1a'; ctx.beginPath(); ctx.arc(x+7,y+2+sq,2.3,0,Math.PI*2); ctx.arc(x+e.w-7,y+2+sq,2.3,0,Math.PI*2); ctx.fill();
+    }
+    if(e.frozen>0 && e.type!=='G'){
+      ctx.fillStyle='rgba(154,230,255,.55)'; rr(x-2,y-2,e.w+4,e.h+4,8);
+      ctx.strokeStyle='#e8fbff'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(x+e.w/2,y-2); ctx.lineTo(x+e.w/2,y+e.h+2);
+      ctx.moveTo(x-2,y+e.h/2); ctx.lineTo(x+e.w+2,y+e.h/2); ctx.stroke();
     }
     ctx.restore();
   }
 }
 function drawStuff(){
+  for(const w of world.warnings){
+    const wx = w.x - cam.x + 6;
+    const pulse = w.t%10<5;
+    ctx.globalAlpha = pulse ? 0.75 : 0.35;
+    ctx.fillStyle = '#ffe066';
+    ctx.fillRect(wx-9, 0, 18, H);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle='#fff9d6'; ctx.textAlign='center'; ctx.font='bold 20px Courier New';
+    ctx.fillText('!', wx, 40);
+  }
   for(const it of world.items){
     const x = it.x-cam.x, y = it.y-cam.y;
     const info = ITEM_INFO[it.kind];
@@ -712,11 +972,19 @@ function drawStuff(){
       ctx.fillStyle='rgba(255,255,255,.5)'; ctx.beginPath(); ctx.arc(x+9,y+11,3.5,0,Math.PI*2); ctx.fill();
     }
   }
+  const PROJ_COL = { ghiaccio:['#9ae6ff','#eafcff'], veleno:['#9b5de5','#e0c8ff'], fulmine:['#ffe066','#fff9d6'], fuoco:['#ff9f1c','#fff3b0'] };
   for(const f of world.fireballs){
-    ctx.fillStyle='#ff9f1c'; ctx.beginPath();
-    ctx.arc(f.x-cam.x+6, f.y-cam.y+6, 7, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle='#fff3b0'; ctx.beginPath();
-    ctx.arc(f.x-cam.x+6, f.y-cam.y+6, 3.5, 0, Math.PI*2); ctx.fill();
+    const [c1,c2] = PROJ_COL[f.kind]||PROJ_COL.fuoco;
+    if(f.kind==='fulmine'){
+      ctx.strokeStyle=c1; ctx.lineWidth=4; ctx.beginPath();
+      const fx=f.x-cam.x+6, fy=f.y-cam.y;
+      ctx.moveTo(fx-4,fy); ctx.lineTo(fx+4,fy+10); ctx.lineTo(fx-2,fy+10); ctx.lineTo(fx+6,fy+24); ctx.stroke();
+    } else {
+      ctx.fillStyle = c1; ctx.beginPath();
+      ctx.arc(f.x-cam.x+6, f.y-cam.y+6, 7, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = c2; ctx.beginPath();
+      ctx.arc(f.x-cam.x+6, f.y-cam.y+6, 3.5, 0, Math.PI*2); ctx.fill();
+    }
   }
   for(const p of particles){
     ctx.globalAlpha = Math.min(1, p.life/20);
@@ -745,16 +1013,18 @@ function drawHUD(){
   const tags = [];
   if(player.big) tags.push(['GIGANTE','#ff4d6d']);
   if(player.flame) tags.push(['FIAMMA','#ff9f1c']);
+  if(player.ice) tags.push(['GHIACCIO','#9ae6ff']);
   if(player.feather) tags.push(['PIUMA','#4cc9f0']);
   if(player.shield) tags.push(['SCUDO','#57e389']);
   if(player.star>0) tags.push(['STELLA '+Math.ceil(player.star/60),'#ffd60a']);
   // barra vita boss
   const b = world.boss;
   if(b && !b.dead && world.cfg.boss){
+    const pal = BOSS_PAL[b.kind]||BOSS_PAL.melmone;
     ctx.fillStyle='rgba(0,0,0,.5)'; rr(W/2-160, 54, 320, 26, 8);
-    ctx.fillStyle='#c22853'; rr(W/2-155, 58, 310*(b.hp/b.maxhp), 18, 6);
+    ctx.fillStyle=pal.body2; rr(W/2-155, 58, 310*(b.hp/b.maxhp), 18, 6);
     ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.font='bold 14px Courier New';
-    ctx.fillText('RE MELMONE', W/2, 72);
+    ctx.fillText(BOSS_NAMES[b.kind]||'RE MELMONE', W/2, 72);
   }
   // riga power-up sotto HUD
   ctx.font='bold 14px Courier New'; ctx.textAlign='left';
@@ -811,10 +1081,22 @@ function drawMenu(){
     drawStat(cx-80, cy+95, 'VEL', c.speed/1.4);
     drawStat(cx+10, cy+95, 'SALTO', c.jump/1.1);
   }
+  ctx.font='13px Courier New'; ctx.fillStyle='#9ae6ff'; ctx.textAlign='center';
+  ctx.fillText('Parti da:', W/2, 432);
+  for(let w=1; w<=3; w++){
+    const info = WORLD_INFO[w];
+    const bx = W/2 + (w-2)*170, by=452;
+    const sel = w===worldSel;
+    ctx.fillStyle = sel ? 'rgba(255,214,10,.25)' : 'rgba(255,255,255,.08)';
+    rr(bx-80, by-16, 160, 32, 8);
+    if(sel){ ctx.strokeStyle=info.col; ctx.lineWidth=2; ctx.strokeRect(bx-80,by-16,160,32); }
+    ctx.fillStyle = sel?info.col:'#cbd5e1'; ctx.font='bold 13px Courier New';
+    ctx.fillText('MONDO '+w, bx, by+5);
+  }
   ctx.font='bold 22px Courier New'; ctx.fillStyle='#7dff8a';
   ctx.fillText('PREMI SPAZIO PER INIZIARE', W/2, 490+Math.sin(frame*0.1)*3);
   ctx.font='13px Courier New'; ctx.fillStyle='#8899aa';
-  ctx.fillText('← → muovi · SPAZIO salta · X fiamma · Rompi i blocchi ★ e ♦!', W/2, 520);
+  ctx.fillText('← → muovi · SPAZIO salta · X fiamma · tasti 1-2-3 per scegliere il mondo', W/2, 520);
 }
 function drawStat(x,y,label,v){
   ctx.textAlign='left'; ctx.font='11px Courier New'; ctx.fillStyle='#8899aa';
@@ -846,7 +1128,13 @@ function handleUIKey(k){
   if(state==='MENU'){
     if(k==='ArrowLeft') { charIdx=(charIdx+2)%3; SFX.coin(); }
     if(k==='ArrowRight'){ charIdx=(charIdx+1)%3; SFX.coin(); }
-    if(k===' '){ score=0; coins=0; lives=3; player=null; startLevel(0); }
+    if(k==='1'||k==='2'||k==='3'){ worldSel=+k; SFX.coin(); }
+    if(k===' '){ score=0; coins=0; lives=3; player=null;
+      const startIdx = LEVELS.findIndex(l=>l.world===worldSel);
+      startLevel(startIdx>=0?startIdx:0); }
+  } else if(state==='WORLDCARD' && k===' '){ state='PLAY';
+  } else if(state==='BOSSCARD' && k===' '){ state='PLAY';
+  } else if(state==='WORLDEND' && k===' ' && worldEndT<190){ startLevel(levelIdx+1);
   } else if(state==='CLEAR' && k===' ' && clearTimer>40){
     if(levelIdx+1<LEVELS.length) startLevel(levelIdx+1); else state='WIN';
   } else if(state==='GAMEOVER' && k===' '){ state='MENU'; }
@@ -857,12 +1145,16 @@ function handleClick(mx,my){
     for(let i=0;i<3;i++){
       const cx = W/2+(i-1)*250;
       if(mx>cx-105&&mx<cx+105&&my>215&&my<415){
-        if(charIdx===i){ score=0; coins=0; lives=3; player=null; startLevel(0); }
+        if(charIdx===i){ handleUIKey(' '); }
         else { charIdx=i; SFX.coin(); }
         return;
       }
     }
-    if(my>440){ score=0; coins=0; lives=3; player=null; startLevel(0); }
+    for(let w=1; w<=3; w++){
+      const bx = W/2 + (w-2)*170, by=452;
+      if(mx>bx-80&&mx<bx+80&&my>by-16&&my<by+16){ worldSel=w; SFX.coin(); return; }
+    }
+    if(my>475) handleUIKey(' ');
   } else handleUIKey(' ');
 }
 
@@ -873,17 +1165,91 @@ function tick(){
     timeLeft--;
     if(timeLeft<=0) killPlayer();
     updatePlayer(); updateEnemies(); updateStuff(); updateCam();
+    if(world.boss && world.boss.dead && bossDeadT>0){
+      bossDeadT--;
+      if(bossDeadT<=0){
+        if(levelIdx+1>=LEVELS.length){ state='WIN'; }
+        else if(LEVELS[levelIdx+1].world !== LEVELS[levelIdx].world){ state='WORLDEND'; worldEndT=210; }
+        else { levelClear(); }
+      }
+    }
   } else if(state==='CLEAR'){ clearTimer++; updateStuff();
     player.vx=0; player.x += 1.5; player.animT+=0.3; updateCam(); }
+  else if(state==='WORLDCARD'){ worldCardT--; if(worldCardT<=0) state='PLAY'; }
+  else if(state==='BOSSCARD'){ bossCardT--; if(bossCardT<=0) state='PLAY'; }
+  else if(state==='WORLDEND'){ worldEndT--; if(worldEndT<=0) startLevel(levelIdx+1); }
   // render
   ctx.save();
   if(shake>0){ shake--; ctx.translate((Math.random()-.5)*shake, (Math.random()-.5)*shake); }
   if(state==='MENU'){ drawMenu(); }
   else {
     drawSky(world.cfg); drawTiles(); drawStuff(); drawEnemies(); drawPlayer(); drawHUD();
+    if(state==='WORLDCARD'){
+      const wi = WORLD_INFO[LEVELS[levelIdx].world] || WORLD_INFO[1];
+      ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(0,0,W,H);
+      ctx.textAlign='center';
+      ctx.font='bold 38px Courier New'; ctx.fillStyle=wi.col;
+      ctx.fillText(wi.title, W/2, H/2-30+Math.sin(frame*0.05)*4);
+      ctx.font='18px Courier New'; ctx.fillStyle='#fff';
+      ctx.fillText(wi.sub, W/2, H/2+15);
+      ctx.font='bold 16px Courier New'; ctx.fillStyle='#7dff8a';
+      ctx.fillText('PREMI SPAZIO PER CONTINUARE', W/2, H/2+60+Math.sin(frame*0.1)*3);
+    }
+    if(state==='BOSSCARD'){
+      const bk = LEVELS[levelIdx].bossKind || 'melmone';
+      const pal = BOSS_PAL[bk] || BOSS_PAL.melmone;
+      ctx.fillStyle='rgba(20,0,10,.8)'; ctx.fillRect(0,0,W,H);
+      ctx.textAlign='center';
+      ctx.font='bold 30px Courier New'; ctx.fillStyle=pal.crown;
+      ctx.fillText('⚠ '+BOSS_NAMES[bk]+' ⚠', W/2, H/2-40+Math.sin(frame*0.08)*4);
+      ctx.font='16px Courier New'; ctx.fillStyle='#fff';
+      wrapText(BOSS_TAUNTS[bk]||'', W/2, H/2+10, 560, 22);
+      ctx.font='bold 16px Courier New'; ctx.fillStyle='#7dff8a';
+      ctx.fillText('PREMI SPAZIO PER COMBATTERE', W/2, H/2+70+Math.sin(frame*0.1)*3);
+    }
+    if(state==='WORLDEND'){
+      const curW = LEVELS[levelIdx].world;
+      const nextW = LEVELS[Math.min(levelIdx+1,LEVELS.length-1)].world;
+      const nextInfo = WORLD_INFO[nextW] || WORLD_INFO[1];
+      const t = 210 - worldEndT; // 0..210, progressione dell'animazione
+      const dark = Math.min(0.85, t/60);
+      ctx.fillStyle='rgba(5,0,15,'+dark+')'; ctx.fillRect(0,0,W,H);
+      // crepe di fulmine che attraversano lo schermo dopo un attimo
+      if(t>40){
+        ctx.strokeStyle='rgba(255,230,120,'+Math.max(0,1-((t-40)%50)/50)+')'; ctx.lineWidth=3;
+        ctx.beginPath();
+        let lx=100+((frame*37)%700), ly=0;
+        ctx.moveTo(lx,ly);
+        for(let i=0;i<6;i++){ lx += (Math.sin(frame*0.3+i)*40); ly += H/6; ctx.lineTo(lx,ly); }
+        ctx.stroke();
+      }
+      ctx.textAlign='center';
+      if(t>25){
+        ctx.font='bold 34px Courier New'; ctx.fillStyle='#ff9de0';
+        ctx.globalAlpha = Math.min(1,(t-25)/40);
+        ctx.fillText('MONDO '+curW+' LIBERATO!', W/2, H/2-70);
+        ctx.globalAlpha=1;
+      }
+      if(t>70){
+        ctx.font='bold 20px Courier New'; ctx.fillStyle='#ff4d6d';
+        ctx.globalAlpha = Math.min(1,(t-70)/40);
+        ctx.fillText('...MA QUALCOSA DI PEGGIO TI ASPETTA.', W/2, H/2-20);
+        ctx.globalAlpha=1;
+      }
+      if(t>110){
+        ctx.globalAlpha = Math.min(1,(t-110)/40);
+        ctx.font='bold 26px Courier New'; ctx.fillStyle=nextInfo.col;
+        ctx.fillText('PROSSIMA TAPPA: '+nextInfo.title, W/2, H/2+40+Math.sin(frame*0.08)*4);
+        ctx.globalAlpha=1;
+      }
+      if(t>160){
+        ctx.font='bold 15px Courier New'; ctx.fillStyle='#7dff8a';
+        ctx.fillText('PREMI SPAZIO PER CONTINUARE', W/2, H/2+90+Math.sin(frame*0.1)*3);
+      }
+    }
     if(state==='CLEAR') overlayScreen('LIVELLO COMPLETATO!', 'Bonus tempo: +'+Math.floor(timeLeft/60)*10+' punti', '#ffd60a');
     if(state==='GAMEOVER') overlayScreen('GAME OVER', 'Punteggio finale: '+score, '#ff4d6d');
-    if(state==='WIN') overlayScreen('★ HAI VINTO! ★', 'Re Melmone è sconfitto! Punti: '+score, '#7dff8a');
+    if(state==='WIN') overlayScreen('★ HAI VINTO! ★', 'Il Regno delle Bacche è salvo! Punti: '+score, '#7dff8a');
   }
   ctx.restore();
   requestAnimationFrame(tick);
